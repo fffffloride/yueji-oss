@@ -105,7 +105,7 @@ After starting, visit http://localhost:3000 and log in with `admin` / `123456`.
 This project ships with an [Agent Skill](https://skills.sh/youlaitech/youlai-skills). Once installed, the AI coding assistant automatically follows this project's Vue3 development conventions (naming, directory structure, BEM + UnoCSS, component and API conventions). It supports 70+ agents including CodeBuddy, Claude Code, Cursor, Codex, and GitHub Copilot.
 
 ```bash
-npx skills add https://github.com/youlaitech/youlai-skills --skill vue
+npx skills add https://github.com/youlaitech/youlai-skills --skill vue-admin
 ```
 
 ## Ecosystem Matrix
