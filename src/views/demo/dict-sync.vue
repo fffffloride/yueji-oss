@@ -144,7 +144,8 @@ import { useDictStoreHook } from "@/stores/dict";
 import { useDateFormat } from "@vueuse/core";
 import DictAPI from "@/api/system/dict";
 import type { DictItemForm } from "@/api/system/dict";
-import { useDictSync, DictMessage } from "@/composables";
+import { useDictSync } from "@/composables";
+import type { DictChangeMessage } from "@/composables";
 
 // 性别字典编码
 const DICT_CODE = "gender";
@@ -186,7 +187,7 @@ const setupSse = () => {
   dictSse.initialize();
 
   // 注册字典消息回调
-  unregisterCallback = dictSse.onDictChange((message: DictMessage) => {
+  unregisterCallback = dictSse.onDictChange((message: DictChangeMessage) => {
     // 只有当消息是关于性别字典的更新时才处理
     if (message.dictCode === DICT_CODE) {
       // 更新最后更新时间
