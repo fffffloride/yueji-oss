@@ -1,16 +1,19 @@
 import { useDictSync } from "./useDictSync";
-import { useOnlineCount } from "./useOnlineCount";
-import { cleanupSse } from "./useSse";
+import { useOnlineUsers } from "./useOnlineUsers";
+import { useSse, cleanupSse } from "./useSse";
 
 /**
  * 初始化所有 SSE 服务
  */
 export function setupSse() {
+  const sse = useSse();
+  sse.connect();
+
   const dictSync = useDictSync();
   dictSync.initialize();
 
-  const onlineCount = useOnlineCount();
-  onlineCount.initialize();
+  const onlineUsers = useOnlineUsers();
+  onlineUsers.initialize();
 }
 
 /**
@@ -20,13 +23,15 @@ export function cleanupSseServices() {
   const dictSync = useDictSync();
   dictSync.cleanup();
 
-  const onlineCount = useOnlineCount();
-  onlineCount.cleanup();
+  const onlineUsers = useOnlineUsers();
+  onlineUsers.cleanup();
 
   cleanupSse();
 }
 
 export { useDictSync } from "./useDictSync";
-export { useOnlineCount } from "./useOnlineCount";
+export { useOnlineUsers } from "./useOnlineUsers";
 export { useSse, cleanupSse, SseConnectionState } from "./useSse";
-export type { DictMessage, DictChangeMessage, DictChangeCallback } from "./useDictSync";
+export { SseTopics } from "./sseTopics";
+export type { DictChangeMessage, DictChangeCallback } from "./useDictSync";
+export type { SseTopic } from "./sseTopics";
