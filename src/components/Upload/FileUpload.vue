@@ -114,11 +114,7 @@ const props = defineProps({
     },
   },
 });
-const modelValue = defineModel("modelValue", {
-  type: [Array] as PropType<FileInfo[]>,
-  required: true,
-  default: () => [],
-});
+const modelValue = defineModel<FileInfo[]>({ required: true, default: () => [] });
 
 const fileList = ref([] as UploadFile[]);
 
