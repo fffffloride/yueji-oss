@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 import type { PageResult } from "@/api/common";
-import type { OrderDetail, OrderListItem, OrderQueryParams } from "./types";
+import type { OrderDetail, OrderListItem, OrderQueryParams, PaymentInfo } from "./types";
 
 const ORDER_BASE_URL = "/api/v1/orders";
 
@@ -32,6 +32,21 @@ const OrderAPI = {
       url: `${ORDER_BASE_URL}/verify`,
       method: "post",
       data: { verifyCode },
+    });
+  },
+
+  getPayment(orderId: string) {
+    return request<unknown, PaymentInfo>({
+      url: `/api/v1/payments/order/${orderId}`,
+      method: "get",
+    });
+  },
+
+  refund(paymentNo: string, reason: string) {
+    return request({
+      url: `/api/v1/payments/${paymentNo}/refund`,
+      method: "post",
+      data: { reason },
     });
   },
 

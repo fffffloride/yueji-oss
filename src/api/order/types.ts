@@ -52,3 +52,13 @@ export interface OrderDetail extends OrderListItem {
     payAmount: number;
   };
 }
+
+export interface PaymentInfo {
+  paymentNo: string;
+  orderId: string;
+  amount: number;
+  channel: string;
+  status: number;
+  thirdPartyNo?: string | null;
+  paidTime?: string | null;
+}

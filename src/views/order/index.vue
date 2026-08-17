@@ -17,6 +17,7 @@
             <el-option :value="2" label="已核销" />
             <el-option :value="3" label="已完成" />
             <el-option :value="4" label="已取消" />
+            <el-option :value="5" label="已退款" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -74,7 +75,7 @@
             </template>
           </el-table-column>
           <el-table-column label="下单时间" prop="createTime" width="180" />
-          <el-table-column fixed="right" label="操作" width="160">
+          <el-table-column fixed="right" label="操作" width="210">
             <template #default="{ row }">
               <el-button type="primary" size="small" link @click="openDetail(row.id)">
                 详情
@@ -88,6 +89,16 @@
                 @click="handleVerify(row.id)"
               >
                 核销
+              </el-button>
+              <el-button
+                v-if="row.status === 1"
+                v-hasPerm="'biz:payment:refund'"
+                type="danger"
+                size="small"
+                link
+                @click="handleRefund(row.id, row.orderNo)"
+              >
+                退款
               </el-button>
             </template>
           </el-table-column>
@@ -217,6 +228,32 @@ async function handleVerify(id: string) {
   });
   await OrderAPI.verifyById(id);
   ElMessage.success("核销成功");
+  fetchData();
+}
+
+async function handleRefund(orderId: string, orderNo: string) {
+  const { value: reason } = await ElMessageBox.prompt(
+    `确认对订单 ${orderNo} 整单退款？退款后不可核销。`,
+    "退款确认",
+    {
+      confirmButtonText: "确认退款",
+      cancelButtonText: "取消",
+      inputPlaceholder: "请输入退款原因",
+      inputValidator: (value) => {
+        const text = value.trim();
+        if (!text) return "请输入退款原因";
+        if (text.length > 255) return "退款原因不能超过255个字符";
+        return true;
+      },
+      type: "warning",
+    }
+  );
+  const payment = await OrderAPI.getPayment(orderId);
+  await OrderAPI.refund(payment.paymentNo, reason.trim());
+  ElMessage.success("退款成功");
+  if (detail.value?.id === orderId) {
+    detail.value = await OrderAPI.getDetail(orderId);
+  }
   fetchData();
 }
 
