@@ -15,6 +15,8 @@ export interface MemberItem {
   status: number;
   points: number;
   levelId?: string | null;
+  levelName?: string;
+  totalSpent: number;
   lastLoginTime?: string | null;
   createTime?: string;
   tags?: string | null;

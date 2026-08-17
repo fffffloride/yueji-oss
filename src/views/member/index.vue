@@ -159,8 +159,11 @@
                 <el-descriptions-item label="性别">
                   {{ genderLabel(detail.profile.gender) }}
                 </el-descriptions-item>
-                <el-descriptions-item label="等级ID">
-                  {{ detail.profile.levelId || "-" }}
+                <el-descriptions-item label="会员等级">
+                  {{ detail.profile.levelName || "普通会员" }}
+                </el-descriptions-item>
+                <el-descriptions-item label="累计完成实付">
+                  ¥{{ formatFen(detail.profile.totalSpent || 0) }}
                 </el-descriptions-item>
                 <el-descriptions-item label="注册时间">
                   {{ detail.profile.createTime || "-" }}

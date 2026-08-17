@@ -45,8 +45,11 @@ export interface OrderDetail extends OrderListItem {
   items: OrderItem[];
   pricing: {
     totalAmount: number;
+    memberLevelId?: string | null;
     memberDiscount: number;
+    memberCouponId?: string | null;
     couponAmount: number;
+    pointsUsed: number;
     pointsDeduct: number;
     discountAmount: number;
     payAmount: number;

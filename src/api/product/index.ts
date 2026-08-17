@@ -6,6 +6,7 @@ import type {
   ProductQueryParams,
   ProductItem,
   ProductForm,
+  SkuOption,
 } from "./types";
 
 const CATEGORY_BASE_URL = "/api/v1/product-categories";
@@ -31,6 +32,12 @@ export const ProductCategoryAPI = {
 };
 
 export const ProductAPI = {
+  getSkuOptions() {
+    return request<unknown, SkuOption[]>({
+      url: `${PRODUCT_BASE_URL}/sku-options`,
+      method: "get",
+    });
+  },
   /** 商品分页列表 */
   getPage(params: ProductQueryParams) {
     return request<unknown, PageResult<ProductItem>>({

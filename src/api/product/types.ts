@@ -63,6 +63,13 @@ export interface SkuForm {
   status?: number;
 }
 
+export interface SkuOption {
+  id: string;
+  productId: string;
+  label: string;
+  price: number;
+}
+
 /** 商品表单 */
 export interface ProductForm {
   id?: string;

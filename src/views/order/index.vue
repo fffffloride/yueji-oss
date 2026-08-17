@@ -131,6 +131,15 @@
           <el-descriptions-item label="优惠">
             ¥{{ formatFen(detail.discountAmount) }}
           </el-descriptions-item>
+          <el-descriptions-item label="会员折扣">
+            -¥{{ formatFen(detail.pricing.memberDiscount) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="优惠券">
+            -¥{{ formatFen(detail.pricing.couponAmount) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="积分抵扣">
+            {{ detail.pricing.pointsUsed }} 积分 / -¥{{ formatFen(detail.pricing.pointsDeduct) }}
+          </el-descriptions-item>
           <el-descriptions-item label="实付">
             ¥{{ formatFen(detail.payAmount) }}
           </el-descriptions-item>
