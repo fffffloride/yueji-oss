@@ -75,7 +75,11 @@ export const CouponAPI = {
     return request({ url: `/api/v1/coupons/${id}`, method: "delete" });
   },
   issue(id: string, memberIds: string[]) {
-    return request({ url: `/api/v1/coupons/${id}/issue`, method: "post", data: { memberIds } });
+    return request<unknown, { issued: number; skipped: number }>({
+      url: `/api/v1/coupons/${id}/issue`,
+      method: "post",
+      data: { memberIds },
+    });
   },
   getRecords(params: MemberCouponQuery) {
     return request<unknown, PageResult<MemberCouponRecord>>({

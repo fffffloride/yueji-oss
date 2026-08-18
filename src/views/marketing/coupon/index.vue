@@ -219,12 +219,22 @@
         </el-form-item>
         <el-form-item label="有效时间" prop="validRange">
           <el-date-picker
+            v-if="!editingFrozen"
             v-model="form.validRange"
             type="datetimerange"
             value-format="YYYY-MM-DDTHH:mm:ss"
             style="width: 100%"
-            :disabled="editingFrozen"
           />
+          <div v-else class="valid-range-edit">
+            <el-input :model-value="form.validRange[0]" disabled />
+            <span>至</span>
+            <el-date-picker
+              v-model="form.validRange[1]"
+              type="datetime"
+              value-format="YYYY-MM-DDTHH:mm:ss"
+              placeholder="延长结束时间"
+            />
+          </div>
         </el-form-item>
         <el-form-item label="发放总量">
           <el-input-number v-model="form.totalQuantity" :min="1" :disabled="editingFrozen" />
@@ -457,8 +467,8 @@ function openIssue(row: CouponItem) {
 }
 async function issue() {
   if (!issueCoupon.value || !issueMemberIds.value.length) return ElMessage.warning("请选择会员");
-  await CouponAPI.issue(issueCoupon.value.id, issueMemberIds.value);
-  ElMessage.success("发放完成");
+  const result = await CouponAPI.issue(issueCoupon.value.id, issueMemberIds.value);
+  ElMessage.success(`发放完成：成功 ${result.issued} 人，跳过 ${result.skipped} 人`);
   issueVisible.value = false;
   fetchData();
 }
@@ -507,6 +517,13 @@ loadOptions();
 <style scoped>
 .coupon-form {
   margin-top: 18px;
+}
+.valid-range-edit {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
 }
 .unit,
 small {

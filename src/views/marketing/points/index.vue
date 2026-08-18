@@ -41,6 +41,16 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="时间">
+          <el-date-picker
+            v-model="timeRange"
+            type="datetimerange"
+            value-format="YYYY-MM-DDTHH:mm:ss"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            clearable
+          />
+        </el-form-item>
         <el-form-item><el-button type="primary" @click="handleQuery">查询</el-button></el-form-item>
       </el-form>
     </el-card>
@@ -106,13 +116,18 @@ const maxRatePercent = computed({
   set: (value: number) => (rule.maxDeductRate = Math.round(value * 100)),
 });
 const ruleSaving = ref(false);
-const { loading, list, total, params, fetchData, handleQuery } = usePageTable<
-  PointsLog,
-  PointsLogQuery
->({
+const {
+  loading,
+  list,
+  total,
+  params,
+  fetchData,
+  handleQuery: queryPage,
+} = usePageTable<PointsLog, PointsLogQuery>({
   initialParams: { pageNum: 1, pageSize: 10, keywords: "", bizType: "" },
   request: PointsAPI.getLogs,
 });
+const timeRange = ref<string[]>([]);
 
 const bizTypes = [
   { value: "INIT", label: "初始积分" },
@@ -134,6 +149,11 @@ async function saveRule() {
   } finally {
     ruleSaving.value = false;
   }
+}
+
+function handleQuery() {
+  [params.startTime, params.endTime] = timeRange.value;
+  queryPage();
 }
 
 function bizTypeLabel(value: string) {
