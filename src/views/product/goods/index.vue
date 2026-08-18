@@ -37,7 +37,9 @@
     <el-card class="page-content" shadow="never">
       <div class="page-toolbar">
         <div class="page-toolbar__left">
-          <el-button type="primary" @click="openDrawer()">新增商品</el-button>
+          <el-button v-hasPerm="'biz:product:create'" type="primary" @click="openDrawer()">
+            新增商品
+          </el-button>
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -87,6 +89,7 @@
           <el-table-column label="上架状态" width="100" align="center">
             <template #default="scope">
               <el-switch
+                v-hasPerm="'biz:product:status'"
                 :model-value="scope.row.status === 1"
                 @change="
                   (val: string | number | boolean) =>
@@ -98,10 +101,22 @@
           <el-table-column prop="sort" label="排序" width="70" align="center" />
           <el-table-column label="操作" fixed="right" width="130">
             <template #default="scope">
-              <el-button type="primary" link size="small" @click="openDrawer(scope.row.id)">
+              <el-button
+                v-hasPerm="'biz:product:update'"
+                type="primary"
+                link
+                size="small"
+                @click="openDrawer(scope.row.id)"
+              >
                 编辑
               </el-button>
-              <el-button type="danger" link size="small" @click="handleDelete(scope.row.id)">
+              <el-button
+                v-hasPerm="'biz:product:delete'"
+                type="danger"
+                link
+                size="small"
+                @click="handleDelete(scope.row.id)"
+              >
                 删除
               </el-button>
             </template>
@@ -438,6 +453,10 @@ async function handleSubmit(): Promise<void> {
       ElMessage.warning("请完整填写SKU的规格名称和售价");
       return;
     }
+  }
+  if (formData.status === 1 && !formData.skus.some((sku) => sku.status !== 0)) {
+    ElMessage.warning("上架商品至少需要一个启用的SKU");
+    return;
   }
 
   const payload: ProductForm = {

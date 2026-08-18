@@ -3,7 +3,9 @@
     <el-card ref="tableWrapperRef" class="page-content" shadow="never">
       <div class="page-toolbar">
         <div class="page-toolbar__left">
-          <el-button type="primary" @click="openDialog()">新增分类</el-button>
+          <el-button v-hasPerm="'biz:product-category:create'" type="primary" @click="openDialog()">
+            新增分类
+          </el-button>
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -48,6 +50,7 @@
             <template #default="scope">
               <el-button
                 v-if="scope.row.level < 3"
+                v-hasPerm="'biz:product-category:create'"
                 type="primary"
                 link
                 size="small"
@@ -56,6 +59,7 @@
                 新增下级
               </el-button>
               <el-button
+                v-hasPerm="'biz:product-category:update'"
                 type="primary"
                 link
                 size="small"
@@ -63,7 +67,13 @@
               >
                 编辑
               </el-button>
-              <el-button type="danger" link size="small" @click.stop="handleDelete(scope.row.id)">
+              <el-button
+                v-hasPerm="'biz:product-category:delete'"
+                type="danger"
+                link
+                size="small"
+                @click.stop="handleDelete(scope.row.id)"
+              >
                 删除
               </el-button>
             </template>
@@ -177,8 +187,7 @@ function toOptions(nodes: CategoryNode[], excludeId?: string): OptionItem[] {
     .map((n) => ({
       value: n.id,
       label: n.name,
-      children:
-        n.level < 2 && n.children ? toOptions(n.children, excludeId) : undefined,
+      children: n.level < 2 && n.children ? toOptions(n.children, excludeId) : undefined,
     }));
 }
 
