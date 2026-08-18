@@ -1,0 +1,38 @@
+import type { BaseQueryParams } from "@/api/common";
+
+export interface DecorationQuery extends BaseQueryParams {
+  keywords?: string;
+  status?: number;
+}
+
+export interface BannerItem {
+  id: string;
+  imageUrl: string;
+  linkUrl?: string | null;
+  sort: number;
+  status: number;
+  createTime?: string;
+}
+
+export interface BannerForm {
+  imageUrl: string;
+  linkUrl?: string;
+  sort: number;
+  status: number;
+}
+
+export interface NoticeItem {
+  id: string;
+  title: string;
+  content: string;
+  sort: number;
+  status: number;
+  createTime?: string;
+}
+
+export type NoticeForm = Omit<NoticeItem, "id" | "createTime">;
+
+export interface BrandForm {
+  id?: string;
+  content: string;
+}
