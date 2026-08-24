@@ -38,6 +38,7 @@ export interface ProductItem {
   subTitle?: string;
   mainImage?: string;
   tags?: string;
+  painFriendly?: boolean;
   /** 现售价(分) */
   price: number;
   /** 原价(分) */
@@ -80,6 +81,7 @@ export interface ProductForm {
   album?: string[];
   videoUrl?: string;
   tags?: string;
+  painFriendly?: boolean;
   /** 原价(分) */
   originalPrice?: number;
   detail?: string;

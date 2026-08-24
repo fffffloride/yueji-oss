@@ -79,6 +79,13 @@
               </el-tag>
             </template>
           </el-table-column>
+          <el-table-column label="疼痛友好" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.painFriendly ? 'success' : 'info'" size="small">
+                {{ scope.row.painFriendly ? "是" : "否" }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="价格(元)" width="110" align="right">
             <template #default="scope">
               {{ toYuan(scope.row.price) }}
@@ -169,6 +176,9 @@
             <el-checkbox value="新品">新品</el-checkbox>
             <el-checkbox value="热卖">热卖</el-checkbox>
           </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="疼痛友好">
+          <el-switch v-model="formData.painFriendly" />
         </el-form-item>
         <el-form-item label="主图" prop="mainImage">
           <SingleImageUpload v-model="formData.mainImage" />
@@ -347,6 +357,7 @@ const drawerState = reactive({ title: "", visible: false });
 type FormState = Omit<ProductForm, "skus"> & { skus: SkuRow[] };
 
 const initialFormData: FormState = {
+  painFriendly: false,
   status: 0,
   sort: 0,
   skus: [],
@@ -415,6 +426,7 @@ async function openDrawer(productId?: string): Promise<void> {
       subTitle: data.subTitle ?? undefined,
       mainImage: data.mainImage ?? undefined,
       videoUrl: data.videoUrl ?? undefined,
+      painFriendly: Boolean(data.painFriendly),
       detail: data.detail ?? "",
       usageNote: data.usageNote ?? undefined,
       status: data.status,
@@ -467,6 +479,7 @@ async function handleSubmit(): Promise<void> {
     album: albumList.value.length ? albumList.value : undefined,
     videoUrl: formData.videoUrl || undefined,
     tags: tagList.value.length ? tagList.value.join(",") : undefined,
+    painFriendly: Boolean(formData.painFriendly),
     originalPrice: toCents(originalPriceYuan.value),
     detail: formData.detail || undefined,
     usageNote: formData.usageNote || undefined,
