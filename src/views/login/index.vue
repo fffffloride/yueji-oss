@@ -50,107 +50,76 @@
 
       <div class="login-card">
         <div class="login-card__inner">
-          <transition name="fade-slide" mode="out-in">
-            <QrCodeLogin
-              v-if="component === 'qrcode'"
-              key="qrcode"
-              class="login-card__form"
-              @switch="component = 'login'"
-            />
+          <div class="login-card__form">
+            <h2 class="login-card__title">欢迎回来</h2>
+            <p class="login-card__desc">请完成身份验证后进入系统</p>
 
-            <div v-else-if="component === 'login'" key="login" class="login-card__form">
-              <h2 class="login-card__title">欢迎回来</h2>
-              <p class="login-card__desc">请完成身份验证后进入系统</p>
+            <el-form
+              ref="loginFormRef"
+              :model="loginFormData"
+              :rules="loginRules"
+              size="large"
+              :validate-on-rule-change="false"
+            >
+              <el-form-item prop="username">
+                <el-input
+                  v-model.trim="loginFormData.username"
+                  placeholder="用户名"
+                  :prefix-icon="UserIcon"
+                />
+              </el-form-item>
 
-              <el-form
-                ref="loginFormRef"
-                :model="loginFormData"
-                :rules="loginRules"
-                size="large"
-                :validate-on-rule-change="false"
-              >
-                <el-form-item prop="username">
+              <el-tooltip :visible="isCapsLock" content="大写锁定已开启" placement="right">
+                <el-form-item prop="password">
                   <el-input
-                    v-model.trim="loginFormData.username"
-                    placeholder="用户名"
-                    :prefix-icon="UserIcon"
+                    v-model.trim="loginFormData.password"
+                    placeholder="密码"
+                    type="password"
+                    show-password
+                    :prefix-icon="LockIcon"
+                    @keyup="checkCapsLock"
+                    @keyup.enter="handleLoginSubmit"
                   />
                 </el-form-item>
+              </el-tooltip>
 
-                <el-tooltip :visible="isCapsLock" content="大写锁定已开启" placement="right">
-                  <el-form-item prop="password">
-                    <el-input
-                      v-model.trim="loginFormData.password"
-                      placeholder="密码"
-                      type="password"
-                      show-password
-                      :prefix-icon="LockIcon"
-                      @keyup="checkCapsLock"
-                      @keyup.enter="handleLoginSubmit"
-                    />
-                  </el-form-item>
-                </el-tooltip>
-
-                <el-form-item prop="captchaCode">
-                  <div class="captcha-row">
-                    <el-input
-                      v-model.trim="loginFormData.captchaCode"
-                      placeholder="验证码"
-                      class="captcha-row__input"
-                      @keyup.enter="handleLoginSubmit"
-                    >
-                      <template #prefix>
-                        <span class="input-prefix-icon i-svg:security" />
-                      </template>
-                    </el-input>
-                    <div class="captcha-img" @click="getCaptcha">
-                      <el-icon v-if="codeLoading" class="is-loading" :size="16">
-                        <Loading />
-                      </el-icon>
-                      <img v-else-if="captchaBase64" :src="captchaBase64" alt="验证码" />
-                      <el-icon v-else :size="16"><Refresh /></el-icon>
-                    </div>
+              <el-form-item prop="captchaCode">
+                <div class="captcha-row">
+                  <el-input
+                    v-model.trim="loginFormData.captchaCode"
+                    placeholder="验证码"
+                    class="captcha-row__input"
+                    @keyup.enter="handleLoginSubmit"
+                  >
+                    <template #prefix>
+                      <span class="input-prefix-icon i-svg:security" />
+                    </template>
+                  </el-input>
+                  <div class="captcha-img" @click="getCaptcha">
+                    <el-icon v-if="codeLoading" class="is-loading" :size="16">
+                      <Loading />
+                    </el-icon>
+                    <img v-else-if="captchaBase64" :src="captchaBase64" alt="验证码" />
+                    <el-icon v-else :size="16"><Refresh /></el-icon>
                   </div>
-                </el-form-item>
-
-                <div class="login-options">
-                  <el-checkbox v-model="loginFormData.rememberMe">记住我</el-checkbox>
-                  <a class="login-options__link" @click="showForm('resetPwd')">忘记密码？</a>
                 </div>
+              </el-form-item>
 
-                <el-button
-                  :loading="loading"
-                  type="primary"
-                  size="large"
-                  class="login-btn"
-                  @click="handleLoginSubmit"
-                >
-                  登录
-                </el-button>
-              </el-form>
-
-              <div class="login-alt">
-                <div class="login-alt__divider">其他登录方式</div>
-                <div class="login-alt__buttons">
-                  <button class="login-alt__btn" @click="component = 'qrcode'">
-                    <span class="login-alt__icon i-svg:qr-code" />
-                    扫码登录
-                  </button>
-                  <button class="login-alt__btn">
-                    <span class="login-alt__icon i-svg:security" />
-                    统一认证
-                  </button>
-                </div>
+              <div class="login-options">
+                <el-checkbox v-model="loginFormData.rememberMe">记住我</el-checkbox>
               </div>
-            </div>
 
-            <ResetPwd
-              v-else
-              key="resetPwd"
-              class="login-card__form"
-              @update:model-value="component = $event"
-            />
-          </transition>
+              <el-button
+                :loading="loading"
+                type="primary"
+                size="large"
+                class="login-btn"
+                @click="handleLoginSubmit"
+              >
+                登录
+              </el-button>
+            </el-form>
+          </div>
         </div>
 
         <div class="login-footer">Copyright © 2021-2026 youlai.tech</div>
@@ -171,13 +140,10 @@ import { useUserStore } from "@/stores";
 import { AuthStorage } from "@/utils/auth";
 import { appConfig } from "@/settings";
 import ThemeSwitch from "@/components/ThemeSwitch/index.vue";
-import ResetPwd from "./components/ResetPwd.vue";
-import QrCodeLogin from "./components/QrCodeLogin.vue";
 import logo from "@/assets/images/logo.png";
 
 const userStore = useUserStore();
 const route = useRoute();
-const component = ref<"login" | "resetPwd" | "qrcode">("login");
 
 const loginFormRef = ref<FormInstance>();
 const loading = ref(false);
@@ -240,10 +206,6 @@ function checkCapsLock(event: KeyboardEvent) {
   if (event instanceof KeyboardEvent) {
     isCapsLock.value = event.getModifierState("CapsLock");
   }
-}
-
-function showForm(type: "resetPwd") {
-  component.value = type;
 }
 
 onMounted(() => getCaptcha());
@@ -558,21 +520,9 @@ $input-h: 44px;
 .login-options {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 22px;
   font-size: 14px;
   color: $text-secondary;
-
-  &__link {
-    font-weight: 500;
-    color: $primary;
-    cursor: pointer;
-    transition: opacity 0.15s;
-
-    &:hover {
-      opacity: 0.8;
-    }
-  }
 }
 
 .login-btn {
@@ -590,63 +540,6 @@ $input-h: 44px;
   &:focus,
   &:focus-visible {
     outline: none;
-  }
-}
-
-.login-alt {
-  margin-top: 28px;
-
-  &__divider {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 14px;
-    font-size: 13px;
-    color: $text-muted;
-
-    &::before,
-    &::after {
-      flex: 1;
-      height: 1px;
-      content: "";
-      background: var(--el-border-color-lighter);
-    }
-  }
-
-  &__buttons {
-    display: flex;
-    gap: 12px;
-  }
-
-  &__btn {
-    display: flex;
-    flex: 1;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-    height: 44px;
-    padding: 0;
-    font-size: 13px;
-    color: $text-secondary;
-    cursor: pointer;
-    background: transparent;
-    border: 1px solid var(--el-border-color-lighter);
-    border-radius: 8px;
-    transition:
-      color 0.2s,
-      background 0.2s,
-      border-color 0.2s;
-
-    &:hover {
-      color: $primary;
-      background: rgba($primary, 0.04);
-      border-color: rgba($primary, 0.28);
-    }
-  }
-
-  &__icon {
-    width: 16px;
-    height: 16px;
   }
 }
 
@@ -715,21 +608,6 @@ $input-h: 44px;
 
 .dark .login-footer {
   color: rgb(255 255 255 / 15%);
-}
-
-.dark .login-alt__divider {
-  color: rgb(255 255 255 / 20%);
-}
-
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.2s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
 }
 
 @keyframes login-pane-in {

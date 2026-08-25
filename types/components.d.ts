@@ -105,7 +105,6 @@ declare module 'vue' {
     PageSearch: typeof import('./../src/components/CURD/PageSearch.vue')['default']
     Pagination: typeof import('./../src/components/Pagination/index.vue')['default']
     Register: typeof import('./../src/views/login/components/Register.vue')['default']
-    ResetPwd: typeof import('./../src/views/login/components/ResetPwd.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SingleImageUpload: typeof import('./../src/components/Upload/SingleImageUpload.vue')['default']
