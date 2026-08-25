@@ -18,11 +18,11 @@
           <div class="login-brand__main">
             <el-tag class="login-brand__tag" type="primary" effect="plain" round>
               <span class="login-brand__tag-dot" />
-              Enterprise Ready
+              DLUMIÈRE BEAUTY
             </el-tag>
-            <h1 class="login-brand__title">企业级管理系统</h1>
+            <h1 class="login-brand__title">悦己而美，自在生光</h1>
             <p class="login-brand__desc">
-              提供安全、高效、可扩展的管理解决方案，助力企业数字化转型与业务增长。
+              以专业医美服务连接每一次美好体验，让品牌、服务与成长从容发生。
             </p>
           </div>
           <div class="login-brand__features">
@@ -30,19 +30,19 @@
               <span class="login-brand__feature-mark">
                 <span class="login-brand__feature-icon i-svg:security" />
               </span>
-              <span class="login-brand__feature-text">安全可靠</span>
+              <span class="login-brand__feature-text">专业医美</span>
             </div>
             <div class="login-brand__feature">
               <span class="login-brand__feature-mark">
                 <el-icon class="login-brand__feature-icon"><Clock /></el-icon>
               </span>
-              <span class="login-brand__feature-text">高效稳定</span>
+              <span class="login-brand__feature-text">品质服务</span>
             </div>
             <div class="login-brand__feature">
               <span class="login-brand__feature-mark">
                 <span class="login-brand__feature-icon i-svg:flexible" />
               </span>
-              <span class="login-brand__feature-text">灵活扩展</span>
+              <span class="login-brand__feature-text">精细运营</span>
             </div>
           </div>
         </div>
