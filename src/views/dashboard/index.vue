@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="dash">
+  <div v-loading="dashboardLoading" class="dash">
     <section class="dash-header">
       <div class="card dash-header__card">
         <div class="dash-header__start">
@@ -21,7 +21,7 @@
           <el-icon :size="18"><Connection /></el-icon>
         </div>
         <div class="stat-card__body">
-          <span class="stat-card__label">在线用户</span>
+          <span class="stat-card__label">后台在线</span>
           <span class="stat-card__num">{{ onlineUserCount }}</span>
         </div>
         <span
@@ -40,7 +40,9 @@
         </div>
         <div class="stat-card__body">
           <span class="stat-card__label">今日访客</span>
-          <span class="stat-card__num">{{ displayTransitionUvCount }}</span>
+          <span class="stat-card__num">
+            {{ dashboardData ? displayTransitionUvCount : "--" }}
+          </span>
         </div>
         <span
           v-if="uvGrowthText !== '--'"
@@ -60,7 +62,9 @@
         </div>
         <div class="stat-card__body">
           <span class="stat-card__label">今日浏览量</span>
-          <span class="stat-card__num">{{ displayTransitionPvCount }}</span>
+          <span class="stat-card__num">
+            {{ dashboardData ? displayTransitionPvCount : "--" }}
+          </span>
         </div>
         <span
           v-if="pvGrowthText !== '--'"
@@ -79,12 +83,21 @@
           <span class="stat-card__svg i-svg:group" />
         </div>
         <div class="stat-card__body">
-          <span class="stat-card__label">系统用户</span>
-          <span class="stat-card__num">6</span>
+          <span class="stat-card__label">会员总数</span>
+          <span class="stat-card__num">{{ dashboardData?.members.total ?? "--" }}</span>
         </div>
-        <span :class="['stat-card__trend', `stat-card__trend--${systemTrendTone}`]">
-          <el-icon :size="12"><ArrowUp /></el-icon>
-          12.5%
+        <span
+          v-if="memberGrowthText !== '--'"
+          :class="['stat-card__trend', `stat-card__trend--${memberTrendTone}`]"
+        >
+          <el-icon :size="12">
+            <ArrowUp v-if="memberIsUp" />
+            <ArrowDown v-else />
+          </el-icon>
+          {{ memberGrowthText }}
+        </span>
+        <span v-else-if="dashboardData" class="stat-card__badge">
+          今日新增 {{ dashboardData.members.todayNew }}
         </span>
       </div>
     </section>
@@ -106,7 +119,9 @@
       <div class="card dash-chart__overview">
         <div class="card__head">
           <h3 class="card__title">待办概览</h3>
-          <el-tag type="primary" size="small" effect="plain">5 项待处理</el-tag>
+          <el-tag type="primary" size="small" effect="plain">
+            {{ dashboardData?.todos.total ?? "--" }} 项待处理
+          </el-tag>
         </div>
         <div class="card__body overview-card">
           <div class="overview-summary">
@@ -144,33 +159,34 @@
       <div class="card">
         <div class="card__head">
           <h3 class="card__title">待办事项</h3>
-          <el-tag size="small" round>5 项</el-tag>
+          <el-tag size="small" round>{{ dashboardData?.todos.total ?? "--" }} 项</el-tag>
         </div>
         <div class="card__body">
           <div
             v-for="todo in todoItems"
             :key="todo.id"
             class="todo-row"
-            :class="{ 'todo-row--done': todo.done }"
+            @click="openTarget(todo.targetRoute)"
           >
-            <el-icon
-              :size="16"
-              :class="todo.done ? 'todo-row__icon--done' : 'todo-row__icon--pending'"
-            >
-              <CircleCheck v-if="todo.done" />
-              <Clock v-else />
-            </el-icon>
+            <el-icon :size="16" class="todo-row__icon--pending"><Clock /></el-icon>
             <span class="todo-row__title">{{ todo.title }}</span>
             <el-tag
-              :type="todo.done ? 'success' : todo.tag === '工单' ? 'warning' : 'info'"
+              :type="
+                todo.type === 'refund_error' || todo.type === 'withdrawal_pay' ? 'warning' : 'info'
+              "
               size="small"
               effect="plain"
               class="todo-row__tag"
             >
-              {{ todo.tag }}
+              {{ todo.status }}
             </el-tag>
-            <span class="todo-row__time">{{ todo.time }}</span>
+            <span class="todo-row__time">{{ formatRelativeTime(todo.occurredAt) }}</span>
           </div>
+          <el-empty
+            v-if="dashboardData && !todoItems.length"
+            description="暂无待办"
+            :image-size="52"
+          />
         </div>
       </div>
 
@@ -180,11 +196,21 @@
         </div>
         <div class="card__body card__body--scroll">
           <div class="feed">
-            <div v-for="item in activities" :key="item.id" class="feed__item">
+            <div
+              v-for="item in activities"
+              :key="item.id"
+              class="feed__item"
+              @click="openTarget(item.targetRoute)"
+            >
               <span class="feed__dot" />
               <span class="feed__text">{{ item.content }}</span>
-              <span class="feed__time">{{ item.time }}</span>
+              <span class="feed__time">{{ formatRelativeTime(item.occurredAt) }}</span>
             </div>
+            <el-empty
+              v-if="dashboardData && !activities.length"
+              description="暂无动态"
+              :image-size="52"
+            />
           </div>
         </div>
       </div>
@@ -197,25 +223,19 @@ defineOptions({ name: "Dashboard", inheritAttrs: false });
 
 import { dayjs } from "element-plus";
 import { ref } from "vue";
-import LogAPI from "@/api/system/log";
-import type { VisitOverviewDetail, VisitTrendDetail } from "@/api/system/log";
+import { useRouter } from "vue-router";
+import DashboardAPI from "@/api/dashboard";
+import type { DashboardOverview, DashboardTraffic } from "@/api/dashboard";
 import { useUserStore } from "@/stores/user";
 import { useSettingsStore } from "@/stores/settings";
 import { formatGrowthRate } from "@/utils";
 import { useTransition } from "@vueuse/core";
-import {
-  User,
-  Connection,
-  View,
-  ArrowUp,
-  ArrowDown,
-  Clock,
-  CircleCheck,
-} from "@element-plus/icons-vue";
+import { User, Connection, View, ArrowUp, ArrowDown, Clock } from "@element-plus/icons-vue";
 import { useOnlineUsers } from "@/composables";
 
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const router = useRouter();
 const { onlineUserCount, isConnected } = useOnlineUsers();
 
 const hours = new Date().getHours();
@@ -234,112 +254,53 @@ const currentDateStr = computed(() => {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 星期${w[d.getDay()]}`;
 });
 
-interface TodoItem {
-  id: number;
-  title: string;
-  tag: string;
-  time: string;
-  done: boolean;
-}
+const dashboardData = ref<DashboardOverview>();
+const dashboardLoading = ref(false);
 
-const todoItems: TodoItem[] = [
-  {
-    id: 1,
-    title: "审批：张三提交的请假申请",
-    tag: "审批",
-    time: "10分钟前",
-    done: false,
-  },
-  {
-    id: 2,
-    title: "审核：新用户注册信息核实",
-    tag: "审核",
-    time: "30分钟前",
-    done: false,
-  },
-  {
-    id: 3,
-    title: "发布：系统维护通知公告",
-    tag: "通知",
-    time: "1小时前",
-    done: false,
-  },
-  {
-    id: 4,
-    title: "处理：工单 #TSK-20240509",
-    tag: "工单",
-    time: "2小时前",
-    done: false,
-  },
-  {
-    id: 5,
-    title: "更新：用户角色权限配置",
-    tag: "配置",
-    time: "昨天 15:30",
-    done: true,
-  },
-];
-
-interface Activity {
-  id: number;
-  content: string;
-  time: string;
-}
-
-const activities: Activity[] = [
-  { id: 1, content: "管理员 admin 登录系统", time: "3分钟前" },
-  { id: 2, content: "新增用户李四，角色为普通用户", time: "25分钟前" },
-  { id: 3, content: "系统配置项「登录策略」已更新", time: "1小时前" },
-  { id: 4, content: "数据库自动备份任务执行完成", time: "3小时前" },
-  { id: 5, content: "角色权限批量修改：运营组新增导出权限", time: "昨天 16:42" },
-  { id: 6, content: "SSL 证书已自动续期", time: "昨天 09:15" },
-];
-
-const todoOverviewItems = [
-  { label: "审批", value: "2", percent: 40, tone: "primary" },
-  { label: "审核", value: "1", percent: 20, tone: "primary" },
-  { label: "通知", value: "1", percent: 20, tone: "primary" },
-  { label: "工单", value: "1", percent: 20, tone: "primary" },
-];
-
-const todoSummaryItems = [
-  { label: "今日新增", value: "3", tone: "primary" },
-  { label: "即将超时", value: "1", tone: "primary" },
-  { label: "今日完成", value: "1", tone: "success" },
-];
-
-const visitOverviewData = ref<VisitOverviewDetail>({
-  todayUvCount: 0,
-  uvGrowthRate: 0,
-  totalUvCount: 0,
-  todayPvCount: 0,
-  pvGrowthRate: 0,
-  totalPvCount: 0,
+const todoItems = computed(() => dashboardData.value?.todos.items ?? []);
+const activities = computed(() => dashboardData.value?.activities ?? []);
+const todoOverviewItems = computed(() => {
+  const total = dashboardData.value?.todos.total ?? 0;
+  return (dashboardData.value?.todos.categories ?? []).map((item) => ({
+    label: item.label,
+    value: item.count,
+    percent: total ? Math.round((item.count / total) * 100) : 0,
+  }));
 });
+const todoSummaryItems = computed(() => [
+  { label: "今日新增", value: dashboardData.value?.todos.todayNew ?? "--" },
+  { label: "当前待处理", value: dashboardData.value?.todos.total ?? "--" },
+  { label: "今日已处理", value: dashboardData.value?.todos.todayDone ?? "--" },
+]);
 
 const uvGrowthText = computed(() => {
-  const r = visitOverviewData.value.uvGrowthRate;
+  const r = dashboardData.value?.traffic.uvGrowthRate;
   return r == null ? "--" : formatGrowthRate(r);
 });
 const pvGrowthText = computed(() => {
-  const r = visitOverviewData.value.pvGrowthRate;
+  const r = dashboardData.value?.traffic.pvGrowthRate;
   return r == null ? "--" : formatGrowthRate(r);
 });
-const uvIsUp = computed(() => (visitOverviewData.value.uvGrowthRate || 0) > 0);
-const pvIsUp = computed(() => (visitOverviewData.value.pvGrowthRate || 0) > 0);
+const memberGrowthText = computed(() => {
+  const rate = dashboardData.value?.members.growthRate;
+  return rate == null ? "--" : formatGrowthRate(rate);
+});
+const uvIsUp = computed(() => (dashboardData.value?.traffic.uvGrowthRate || 0) > 0);
+const pvIsUp = computed(() => (dashboardData.value?.traffic.pvGrowthRate || 0) > 0);
+const memberIsUp = computed(() => (dashboardData.value?.members.growthRate || 0) > 0);
 const uvTrendTone = computed(() => (uvIsUp.value ? "success" : "danger"));
 const pvTrendTone = computed(() => (pvIsUp.value ? "success" : "danger"));
-const systemTrendTone = "success";
+const memberTrendTone = computed(() => (memberIsUp.value ? "success" : "danger"));
 
 const tUv = useTransition(
-  computed(() => visitOverviewData.value.todayUvCount),
+  computed(() => dashboardData.value?.traffic.todayUv ?? 0),
   {
     duration: 800,
     transition: [0.25, 0.1, 0.25, 1.0],
   }
 );
 const tPv = useTransition(
-  computed(() => visitOverviewData.value.todayPvCount),
+  computed(() => dashboardData.value?.traffic.todayPv ?? 0),
   {
     duration: 800,
     transition: [0.25, 0.1, 0.25, 1.0],
@@ -348,8 +309,8 @@ const tPv = useTransition(
 const displayTransitionUvCount = computed(() => Math.round(Number(tUv.value)));
 const displayTransitionPvCount = computed(() => Math.round(Number(tPv.value)));
 
-const visitTrendDateRange = ref(7);
-const visitTrendData = ref<VisitTrendDetail>();
+const visitTrendDateRange = ref<7 | 30>(7);
+const visitTrendData = ref<DashboardTraffic>();
 const visitTrendChartOptions = ref({});
 
 function getCssVar(name: string, fallback: string) {
@@ -382,26 +343,19 @@ function colorWithAlpha(color: string, alpha: number) {
   return value;
 }
 
-function fetchVisitOverviewData() {
-  LogAPI.getVisitOverview().then((d) => {
-    visitOverviewData.value = d;
-  });
+async function fetchDashboardData() {
+  dashboardLoading.value = true;
+  try {
+    const data = await DashboardAPI.getOverview(visitTrendDateRange.value);
+    dashboardData.value = data;
+    visitTrendData.value = data.traffic;
+    updateVisitTrendChartOptions(data.traffic);
+  } finally {
+    dashboardLoading.value = false;
+  }
 }
 
-function fetchVisitTrendData() {
-  const s = dayjs()
-    .subtract(visitTrendDateRange.value - 1, "day")
-    .toDate();
-  LogAPI.getVisitTrend({
-    startDate: dayjs(s).format("YYYY-MM-DD"),
-    endDate: dayjs(new Date()).format("YYYY-MM-DD"),
-  }).then((d) => {
-    visitTrendData.value = d;
-    updateVisitTrendChartOptions(d);
-  });
-}
-
-function updateVisitTrendChartOptions(d: VisitTrendDetail) {
+function updateVisitTrendChartOptions(d: DashboardTraffic) {
   const primary = getCssVar("--el-color-primary", "#409eff");
   const success = getCssVar("--el-color-success", "#67c23a");
   const textSecondary = getCssVar("--el-text-color-secondary", "#909399");
@@ -496,7 +450,7 @@ function updateVisitTrendChartOptions(d: VisitTrendDetail) {
 
 watch(
   () => visitTrendDateRange.value,
-  () => fetchVisitTrendData(),
+  () => fetchDashboardData(),
   { immediate: true }
 );
 watch(
@@ -510,9 +464,20 @@ watch(
   },
   { deep: true }
 );
-onMounted(() => {
-  fetchVisitOverviewData();
-});
+
+function formatRelativeTime(value: string): string {
+  const minutes = Math.max(0, dayjs().diff(dayjs(value), "minute"));
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${minutes}分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}小时前`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "昨天" : `${days}天前`;
+}
+
+function openTarget(targetRoute?: string): void {
+  if (targetRoute) router.push(targetRoute);
+}
 </script>
 
 <style lang="scss" scoped>
