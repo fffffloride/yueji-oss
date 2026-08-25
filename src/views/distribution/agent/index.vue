@@ -284,11 +284,14 @@
           ¥{{ fen(detail.directVerifiedSales) }}
         </el-descriptions-item>
         <el-descriptions-item label="邀请码">{{ detail.inviteCode }}</el-descriptions-item>
-        <el-descriptions-item label="待结算">
-          ¥{{ fen(detail.commissionSummary?.pending || 0) }}
+        <el-descriptions-item label="待核销">
+          ¥{{ fen(detail.commissionSummary?.waitingVerify || 0) }}
         </el-descriptions-item>
-        <el-descriptions-item label="可提现">
-          ¥{{ fen(detail.commissionSummary?.available || 0) }}
+        <el-descriptions-item label="待结算">
+          ¥{{ fen(detail.commissionSummary?.pendingSettlement || 0) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="已结算">
+          ¥{{ fen(detail.commissionSummary?.settled || 0) }}
         </el-descriptions-item>
       </el-descriptions>
       <h3>操作日志</h3>

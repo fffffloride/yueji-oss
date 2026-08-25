@@ -72,8 +72,9 @@ export interface AgentItem {
 }
 
 export interface CommissionSummary {
-  pending: number;
-  available: number;
+  waitingVerify: number;
+  pendingSettlement: number;
+  settled: number;
   reversed: number;
 }
 
@@ -129,6 +130,78 @@ export interface CommissionItem {
   agentLevelName?: string | null;
   status: number;
   paidTime: string;
-  availableTime?: string | null;
+  pendingSettlementTime?: string | null;
+  settledTime?: string | null;
   reversedTime?: string | null;
+}
+
+export type SettlementCycle = "WEEK" | "MONTH" | "QUARTER" | "YEAR";
+export type WithdrawalMode = "APPLY" | "AUTO";
+
+export interface SettlementConfig {
+  id?: string;
+  cycleType: SettlementCycle;
+  settlementDay: number;
+  withdrawalMode: WithdrawalMode;
+  singleLimitAmount: number;
+  nextSettlementDate?: string;
+}
+
+export interface SettlementQuery extends BaseQueryParams {
+  agentId?: string;
+  profitPoint?: "PRODUCT_SALES";
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface SettlementItem {
+  id: string;
+  settlementNo: string;
+  agentId: string;
+  agentName?: string | null;
+  profitPoint: "PRODUCT_SALES";
+  periodStart: string;
+  periodEnd: string;
+  commissionCount: number;
+  amount: number;
+  settledTime: string;
+}
+
+export interface WithdrawalQuery extends BaseQueryParams {
+  keywords?: string;
+  agentId?: string;
+  sourceMode?: WithdrawalMode;
+  status?: number;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface WithdrawalItem {
+  id: string;
+  withdrawalNo: string;
+  agentId: string;
+  agentName?: string | null;
+  memberId: string;
+  memberNickname?: string | null;
+  sourceMode: WithdrawalMode;
+  amount: number;
+  status: number;
+  reviewBy?: string | null;
+  reviewTime?: string | null;
+  reviewReason?: string | null;
+  transferNo?: string | null;
+  paidBy?: string | null;
+  paidTime?: string | null;
+  paidRemark?: string | null;
+  autoPeriodEnd?: string | null;
+  createTime: string;
+}
+
+export interface SettlementRunResult {
+  periodStart?: string;
+  periodEnd?: string;
+  settlementsCreated: number;
+  commissionsSettled: number;
+  amountSettled: number;
+  withdrawalsCreated?: number;
 }

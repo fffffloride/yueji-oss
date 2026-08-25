@@ -28,9 +28,10 @@
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="params.status" clearable style="width: 120px">
-            <el-option label="待结算" :value="0" />
-            <el-option label="可提现" :value="1" />
+            <el-option label="待核销" :value="0" />
+            <el-option label="待结算" :value="1" />
             <el-option label="已冲销" :value="2" />
+            <el-option label="已结算" :value="3" />
           </el-select>
         </el-form-item>
         <el-form-item label="支付时间">
@@ -90,7 +91,7 @@
           <el-table-column prop="paidTime" label="支付时间" width="180" />
           <el-table-column label="状态时间" width="180">
             <template #default="{ row }">
-              {{ row.reversedTime || row.availableTime || "-" }}
+              {{ row.reversedTime || row.settledTime || row.pendingSettlementTime || "-" }}
             </template>
           </el-table-column>
         </el-table>
@@ -153,8 +154,8 @@ function reset() {
 }
 const fen = (v: number) => (v / 100).toFixed(2),
   rate = (v: number) => `${(v / 100).toFixed(2)}%`,
-  status = (s: number) => ["待结算", "可提现", "已冲销"][s] || "未知",
-  tag = (s: number): TagProps["type"] => (s === 1 ? "success" : s === 2 ? "danger" : "warning");
+  status = (s: number) => ["待核销", "待结算", "已冲销", "已结算"][s] || "未知",
+  tag = (s: number): TagProps["type"] => (s === 3 ? "success" : s === 2 ? "danger" : "warning");
 onMounted(async () => {
   fetchData();
   agents.value = (await DistributionAPI.getAgentPage({ pageNum: 1, pageSize: 100 })).list;

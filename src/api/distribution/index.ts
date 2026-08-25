@@ -13,7 +13,13 @@ import type {
   DistributionConfigQuery,
   DistributionLevelForm,
   DistributionLevelItem,
+  SettlementConfig,
+  SettlementItem,
+  SettlementQuery,
+  SettlementRunResult,
   TeamNode,
+  WithdrawalItem,
+  WithdrawalQuery,
 } from "./types";
 
 const BASE_URL = "/api/v1/distribution";
@@ -100,6 +106,44 @@ export const DistributionAPI = {
       url: `${BASE_URL}/commissions/page`,
       method: "get",
       params,
+    }),
+
+  getSettlementConfig: () =>
+    request<unknown, SettlementConfig>({ url: `${BASE_URL}/settlement/config`, method: "get" }),
+  updateSettlementConfig: (data: SettlementConfig) =>
+    request<unknown, SettlementConfig>({
+      url: `${BASE_URL}/settlement/config`,
+      method: "put",
+      data,
+    }),
+  runDueSettlement: () =>
+    request<unknown, SettlementRunResult>({
+      url: `${BASE_URL}/settlements/run-due`,
+      method: "post",
+    }),
+  getSettlementPage: (params: SettlementQuery) =>
+    request<unknown, PageResult<SettlementItem>>({
+      url: `${BASE_URL}/settlements/page`,
+      method: "get",
+      params,
+    }),
+  getWithdrawalPage: (params: WithdrawalQuery) =>
+    request<unknown, PageResult<WithdrawalItem>>({
+      url: `${BASE_URL}/withdrawals/page`,
+      method: "get",
+      params,
+    }),
+  auditWithdrawal: (id: string, status: 1 | 2, reason: string) =>
+    request({
+      url: `${BASE_URL}/withdrawals/${id}/audit`,
+      method: "put",
+      data: { status, reason },
+    }),
+  markWithdrawalPaid: (id: string, transferNo: string, remark?: string) =>
+    request({
+      url: `${BASE_URL}/withdrawals/${id}/paid`,
+      method: "put",
+      data: { transferNo, remark },
     }),
 };
 
