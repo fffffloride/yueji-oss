@@ -2,14 +2,7 @@
  * 应用配置
  */
 
-import {
-  LayoutMode,
-  ComponentSize,
-  SidebarColor,
-  ThemeMode,
-  LanguageEnum,
-  TagsViewStyle,
-} from "@/enums";
+import { LayoutMode, ComponentSize, SidebarColor, ThemeMode, TagsViewStyle } from "@/enums";
 
 const env = import.meta.env;
 const { pkg } = __APP_INFO__;
@@ -85,7 +78,6 @@ export const defaults = {
   sidebarColorScheme: SidebarColor.MINIMAL_WHITE,
   layout: LayoutMode.LEFT,
   size: ComponentSize.DEFAULT,
-  language: LanguageEnum.ZH_CN,
   showTagsView: true,
   tagsViewStyle: TagsViewStyle.CARD,
   showAppLogo: true,

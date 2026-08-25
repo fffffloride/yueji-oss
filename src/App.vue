@@ -1,5 +1,5 @@
 <template>
-  <el-config-provider :locale="locale" :size="size">
+  <el-config-provider :locale="zhCn" :size="size">
     <el-watermark
       :font="{ color: fontColor }"
       :content="showWatermark ? watermarkContent : ''"
@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import zhCn from "element-plus/es/locale/lang/zh-cn";
 import { useAppStore, useSettingsStore } from "@/stores";
 import { appConfig } from "@/settings";
 import { ThemeMode, ComponentSize } from "@/enums";
@@ -19,7 +20,6 @@ import { ThemeMode, ComponentSize } from "@/enums";
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 
-const locale = computed(() => appStore.locale);
 const size = computed(() => appStore.size as ComponentSize);
 const showWatermark = computed(() => settingsStore.showWatermark);
 const watermarkContent = appConfig.name;

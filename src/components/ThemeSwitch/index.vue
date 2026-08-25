@@ -25,13 +25,12 @@ import { useSettingsStore } from "@/stores";
 import { ThemeMode } from "@/enums";
 import { Moon, Sunny, Monitor } from "@element-plus/icons-vue";
 
-const { t } = useI18n();
 const settingsStore = useSettingsStore();
 
 const theneList = [
-  { label: t("login.light"), value: ThemeMode.LIGHT, component: Sunny },
-  { label: t("login.dark"), value: ThemeMode.DARK, component: Moon },
-  { label: t("login.auto"), value: ThemeMode.AUTO, component: Monitor },
+  { label: "明亮", value: ThemeMode.LIGHT, component: Sunny },
+  { label: "暗黑", value: ThemeMode.DARK, component: Moon },
+  { label: "跟随系统", value: ThemeMode.AUTO, component: Monitor },
 ];
 
 const currentThemeIcon = computed(() => {

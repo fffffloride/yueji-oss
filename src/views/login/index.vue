@@ -2,7 +2,6 @@
   <div class="login-page">
     <div class="login-toolbar">
       <ThemeSwitch />
-      <LangSelect size="text-18px" />
     </div>
 
     <div class="login-layout">

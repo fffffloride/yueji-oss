@@ -14,10 +14,6 @@
       </div>
 
       <div class="layout-toolbar__item">
-        <LangSelect />
-      </div>
-
-      <div class="layout-toolbar__item">
         <NoticeDropdown />
       </div>
 
@@ -36,12 +32,8 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="handleProfileClick">
-              {{ t("navbar.profile") }}
-            </el-dropdown-item>
-            <el-dropdown-item divided @click="logout">
-              {{ t("navbar.logout") }}
-            </el-dropdown-item>
+            <el-dropdown-item @click="handleProfileClick">个人中心</el-dropdown-item>
+            <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -54,7 +46,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { defaults } from "@/settings";
 import { DeviceEnum, SidebarColor, ThemeMode, LayoutMode } from "@/enums/settings";
@@ -63,12 +54,10 @@ import { useAppStore, useSettingsStore, useUserStore } from "@/stores";
 import CommandPalette from "@/components/CommandPalette/index.vue";
 import Fullscreen from "@/components/Fullscreen/index.vue";
 import SizeSelect from "@/components/SizeSelect/index.vue";
-import LangSelect from "@/components/LangSelect/index.vue";
 import NoticeDropdown from "@/components/NoticeDropdown/index.vue";
 import TenantSwitcher from "@/components/TenantSwitcher/index.vue";
 import { useTenantStoreHook } from "@/stores/tenant";
 
-const { t } = useI18n();
 const appStore = useAppStore();
 const settingStore = useSettingsStore();
 const userStore = useUserStore();
@@ -196,15 +185,6 @@ function handleSettingsClick() {
     :deep(.size-trigger),
     :deep(.notice__trigger) {
       color: inherit;
-    }
-
-    :deep(.i-svg\:language) {
-      flex-shrink: 0;
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-      line-height: 16px;
-      background-size: 16px 16px;
     }
 
     :deep([class*="i-svg:"]),

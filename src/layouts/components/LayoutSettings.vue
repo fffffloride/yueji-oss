@@ -2,37 +2,31 @@
   <el-drawer
     v-model="drawerVisible"
     size="380"
-    :title="t('settings.project')"
+    title="项目配置"
     :before-close="handleCloseDrawer"
     class="settings-drawer"
   >
     <div class="layout-settings__content">
       <section class="layout-settings__section">
-        <div class="layout-settings__section-title">{{ t("settings.theme") }}</div>
+        <div class="layout-settings__section-title">主题设置</div>
 
         <div class="theme-mode">
           <el-radio-group v-model="themeMode">
-            <el-radio-button :value="ThemeMode.LIGHT">
-              {{ t("login.light") }}
-            </el-radio-button>
-            <el-radio-button :value="ThemeMode.DARK">
-              {{ t("login.dark") }}
-            </el-radio-button>
-            <el-radio-button :value="ThemeMode.AUTO">
-              {{ t("login.auto") }}
-            </el-radio-button>
+            <el-radio-button :value="ThemeMode.LIGHT">明亮</el-radio-button>
+            <el-radio-button :value="ThemeMode.DARK">暗黑</el-radio-button>
+            <el-radio-button :value="ThemeMode.AUTO">跟随系统</el-radio-button>
           </el-radio-group>
         </div>
 
         <div class="layout-settings__card">
           <div class="layout-settings__card-header">
-            <span>{{ t("settings.themePalette") }}</span>
+            <span>配色体系</span>
             <button
               type="button"
               :class="['custom-color-trigger', { 'is-open': isCustomColorsOpen }]"
               @click="toggleCustomColors"
             >
-              <span>{{ t("settings.customColors") }}</span>
+              <span>自定义颜色</span>
               <el-icon><ArrowRight /></el-icon>
             </button>
           </div>
@@ -41,16 +35,16 @@
             <el-tooltip
               v-for="item in themePalettePresets"
               :key="item.id"
-              :content="getPaletteDescription(item)"
+              :content="item.description"
               placement="bottom"
             >
               <button
                 type="button"
-                :aria-label="getPaletteName(item)"
+                :aria-label="item.name"
                 :class="['palette-option', { 'is-active': settingsStore.themePalette === item.id }]"
                 @click="settingsStore.applyThemePalette(item.id)"
               >
-                <span class="palette-option__name">{{ getPaletteName(item) }}</span>
+                <span class="palette-option__name">{{ item.name }}</span>
                 <span class="palette-option__colors">
                   <span
                     v-for="color in getPaletteColors(item.colors)"
@@ -67,13 +61,13 @@
         <el-collapse-transition>
           <div v-show="isCustomColorsOpen" class="custom-colors-panel">
             <div class="custom-colors-panel__header">
-              <span>{{ t("settings.customColors") }}</span>
+              <span>自定义颜色</span>
               <span>{{ activePaletteName }}</span>
             </div>
 
             <div class="custom-color-list">
               <div v-for="item in colorOptions" :key="item.name" class="custom-color-row">
-                <span class="custom-color-row__label">{{ getColorLabel(item.name) }}</span>
+                <span class="custom-color-row__label">{{ colorLabels[item.name] }}</span>
                 <span class="custom-color-row__value">
                   {{ settingsStore.themeColors[item.name] }}
                 </span>
@@ -90,7 +84,7 @@
       </section>
 
       <section class="layout-settings__section">
-        <div class="layout-settings__section-title">{{ t("settings.navigation") }}</div>
+        <div class="layout-settings__section-title">导航设置</div>
 
         <div class="settings-layout-select">
           <div class="settings-layout-select__grid">
@@ -145,29 +139,23 @@
           v-if="settingsStore.resolvedTheme !== ThemeMode.DARK"
           class="layout-settings__item layout-settings__item--sidebar-color"
         >
-          <span class="layout-settings__item-label text-xs">
-            {{ t("settings.sidebarColorScheme") }}
-          </span>
+          <span class="layout-settings__item-label text-xs">侧边栏配色</span>
           <el-radio-group
             v-model="sidebarColor"
             class="layout-settings__item-control"
             @change="setSidebarColor"
           >
-            <el-radio :value="SidebarColor.MINIMAL_WHITE">
-              {{ t("settings.minimalWhite") }}
-            </el-radio>
-            <el-radio :value="SidebarColor.CLASSIC_BLUE">
-              {{ t("settings.classicBlue") }}
-            </el-radio>
+            <el-radio :value="SidebarColor.MINIMAL_WHITE">极简白</el-radio>
+            <el-radio :value="SidebarColor.CLASSIC_BLUE">经典蓝</el-radio>
           </el-radio-group>
         </div>
       </section>
 
       <section class="layout-settings__section">
-        <div class="layout-settings__section-title">{{ t("settings.interface") }}</div>
+        <div class="layout-settings__section-title">界面设置</div>
 
         <div class="layout-settings__item flex-x-between">
-          <span class="text-xs">{{ t("settings.showTagsView") }}</span>
+          <span class="text-xs">显示页签</span>
           <el-switch v-model="settingsStore.showTagsView" />
         </div>
 
@@ -176,7 +164,7 @@
           class="layout-settings__item layout-settings__item--block"
         >
           <div class="layout-settings__card-header">
-            <span class="text-xs">{{ t("settings.tagsViewStyle") }}</span>
+            <span class="text-xs">页签风格</span>
           </div>
           <div class="settings-tabs-style">
             <button
@@ -206,17 +194,17 @@
         </div>
 
         <div class="layout-settings__item flex-x-between">
-          <span class="text-xs">{{ t("settings.showAppLogo") }}</span>
+          <span class="text-xs">显示Logo</span>
           <el-switch v-model="settingsStore.showAppLogo" />
         </div>
 
         <div class="layout-settings__item flex-x-between">
-          <span class="text-xs">{{ t("settings.pageSwitchingAnimation") }}</span>
+          <span class="text-xs">页面切换动画</span>
           <el-select v-model="settingsStore.pageSwitchingAnimation" style="width: 150px">
             <el-option
               v-for="(item, key) in pageSwitchingAnimationOptions"
               :key
-              :label="t(`settings.${item.value}`)"
+              :label="item.label"
               :value="item.value"
             />
           </el-select>
@@ -224,20 +212,20 @@
       </section>
 
       <section class="layout-settings__section">
-        <div class="layout-settings__section-title">{{ t("settings.assist") }}</div>
+        <div class="layout-settings__section-title">辅助设置</div>
 
         <div class="layout-settings__item flex-x-between">
-          <span class="text-xs">{{ t("settings.showWatermark") }}</span>
+          <span class="text-xs">显示水印</span>
           <el-switch v-model="settingsStore.showWatermark" />
         </div>
 
         <div class="layout-settings__item flex-x-between">
-          <span class="text-xs">{{ t("settings.grayMode") }}</span>
+          <span class="text-xs">灰色模式</span>
           <el-switch v-model="settingsStore.grayMode" />
         </div>
 
         <div class="layout-settings__item flex-x-between">
-          <span class="text-xs">{{ t("settings.colorWeak") }}</span>
+          <span class="text-xs">色弱模式</span>
           <el-switch v-model="settingsStore.colorWeak" />
         </div>
       </section>
@@ -251,7 +239,7 @@
           :loading="copyLoading"
           @click="copyCurrentSettings"
         >
-          {{ copyLoading ? "复制中..." : t("settings.copyConfig") }}
+          {{ copyLoading ? "复制中..." : "复制配置" }}
         </el-button>
         <el-button
           type="default"
@@ -259,7 +247,7 @@
           :loading="resetLoading"
           @click="resetSettingsToDefault"
         >
-          {{ resetLoading ? "重置中..." : t("settings.resetConfig") }}
+          {{ resetLoading ? "重置中..." : "重置默认" }}
         </el-button>
       </div>
     </template>
@@ -277,9 +265,7 @@ import {
 } from "@/enums";
 import { useSettingsStore } from "@/stores";
 import { themeColorNames, themePalettePresets } from "@/settings";
-import type { ThemeColorMap, ThemeColorName, ThemePalettePreset } from "@/settings";
-
-const { t } = useI18n();
+import type { ThemeColorMap, ThemeColorName } from "@/settings";
 
 const pageSwitchingAnimationOptions = PageSwitchingAnimationOptions;
 
@@ -305,15 +291,15 @@ interface ColorOption {
 }
 
 const layoutOptions: LayoutOption[] = [
-  { value: LayoutMode.LEFT, label: t("settings.leftLayout"), className: "left" },
-  { value: LayoutMode.TOP, label: t("settings.topLayout"), className: "top" },
-  { value: LayoutMode.MIX, label: t("settings.mixLayout"), className: "mix" },
-  { value: LayoutMode.DOUBLE, label: t("settings.doubleLayout"), className: "double" },
+  { value: LayoutMode.LEFT, label: "左侧模式", className: "left" },
+  { value: LayoutMode.TOP, label: "顶部模式", className: "top" },
+  { value: LayoutMode.MIX, label: "混合模式", className: "mix" },
+  { value: LayoutMode.DOUBLE, label: "双列模式", className: "double" },
 ];
 
 const tagsViewStyleOptions: TagsViewStyleOption[] = [
-  { value: TagsViewStyle.CARD, label: t("settings.tagsViewStyles.card") },
-  { value: TagsViewStyle.LINE, label: t("settings.tagsViewStyles.line") },
+  { value: TagsViewStyle.CARD, label: "卡片" },
+  { value: TagsViewStyle.LINE, label: "线性" },
 ];
 
 const colorOptions: ColorOption[] = themeColorNames.map((name) => ({ name }));
@@ -326,10 +312,12 @@ const colorPresets: Record<ThemeColorName, string[]> = {
   info: ["#86909C", "#909399", "#788896", "#6B7785"],
 };
 
-const paletteI18nKeys: Record<string, string> = {
-  arco: "arco",
-  "ant-design": "antDesign",
-  "element-plus": "elementPlus",
+const colorLabels: Record<ThemeColorName, string> = {
+  primary: "主色",
+  success: "成功",
+  warning: "警告",
+  danger: "危险",
+  info: "信息",
 };
 
 const settingsStore = useSettingsStore();
@@ -352,24 +340,8 @@ function getPaletteColors(colors: ThemeColorMap) {
   return colorOptions.map((item) => colors[item.name]);
 }
 
-function getPaletteName(palette: ThemePalettePreset) {
-  const key = paletteI18nKeys[palette.id];
-  return key ? t(`settings.themePalettes.${key}.name`) : palette.name;
-}
-
-function getPaletteDescription(palette: ThemePalettePreset) {
-  const key = paletteI18nKeys[palette.id];
-  return key ? t(`settings.themePalettes.${key}.description`) : palette.description;
-}
-
-function getColorLabel(name: ThemeColorName) {
-  return t(`settings.themeColorNames.${name}`);
-}
-
 const activePaletteName = computed(() =>
-  settingsStore.activeThemePalette
-    ? getPaletteName(settingsStore.activeThemePalette)
-    : t("settings.customPalette")
+  settingsStore.activeThemePalette ? settingsStore.activeThemePalette.name : "自定义"
 );
 
 /**
@@ -417,7 +389,7 @@ async function copyCurrentSettings(): Promise<void> {
     await navigator.clipboard.writeText(configCode);
 
     ElMessage.success({
-      message: t("settings.copySuccess"),
+      message: "配置已复制到剪贴板",
       duration: 3000,
     });
   } catch {
@@ -432,7 +404,7 @@ async function copyCurrentSettings(): Promise<void> {
  */
 async function resetSettingsToDefault(): Promise<void> {
   try {
-    await ElMessageBox.confirm(t("settings.confirmReset"), t("settings.resetConfig"), {
+    await ElMessageBox.confirm("确定要重置所有设置为默认值吗？此操作不可恢复。", "重置默认", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",
@@ -443,7 +415,7 @@ async function resetSettingsToDefault(): Promise<void> {
 
     sidebarColor.value = settingsStore.sidebarColorScheme;
 
-    ElMessage.success(t("settings.resetSuccess"));
+    ElMessage.success("已重置为默认配置");
   } catch {
     // 用户取消时不提示
   } finally {
@@ -465,7 +437,6 @@ function buildDefaultsCode(): string {
     sidebarColorScheme: `SidebarColor.${settingsStore.sidebarColorScheme.toUpperCase().replace("-", "_")}`,
     layout: `LayoutMode.${settingsStore.layout.toUpperCase()}`,
     size: "ComponentSize.DEFAULT",
-    language: "LanguageEnum.ZH_CN",
     showTagsView: settingsStore.showTagsView,
     tagsViewStyle: `TagsViewStyle.${settingsStore.tagsViewStyle.toUpperCase()}`,
     showAppLogo: settingsStore.showAppLogo,
@@ -482,7 +453,6 @@ function buildDefaultsCode(): string {
   sidebarColorScheme: ${settings.sidebarColorScheme},
   layout: ${settings.layout},
   size: ${settings.size},
-  language: ${settings.language},
   showTagsView: ${settings.showTagsView},
   tagsViewStyle: ${settings.tagsViewStyle},
   showAppLogo: ${settings.showAppLogo},

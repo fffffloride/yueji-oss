@@ -89,7 +89,6 @@ declare module 'vue' {
     Hamburger: typeof import('./../src/components/Hamburger/index.vue')['default']
     IconSelect: typeof import('./../src/components/IconSelect/index.vue')['default']
     InputTag: typeof import('./../src/components/InputTag/index.vue')['default']
-    LangSelect: typeof import('./../src/components/LangSelect/index.vue')['default']
     LayoutLogo: typeof import('./../src/layouts/components/LayoutLogo.vue')['default']
     LayoutMain: typeof import('./../src/layouts/components/LayoutMain.vue')['default']
     LayoutNavbar: typeof import('./../src/layouts/components/LayoutNavbar.vue')['default']

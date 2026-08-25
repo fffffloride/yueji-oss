@@ -22,12 +22,8 @@
         >
           <template v-if="onlyOneChild.meta">
             <LayoutMenuIcon :icon="onlyOneChild.meta.icon || item.meta?.icon" />
-            <span
-              v-if="onlyOneChild.meta.title"
-              class="ml-1"
-              :title="translateRouteTitle(onlyOneChild.meta.title)"
-            >
-              {{ translateRouteTitle(onlyOneChild.meta.title) }}
+            <span v-if="onlyOneChild.meta.title" class="ml-1" :title="onlyOneChild.meta.title">
+              {{ onlyOneChild.meta.title }}
             </span>
           </template>
         </el-menu-item>
@@ -38,8 +34,8 @@
       <template #title>
         <template v-if="item.meta">
           <LayoutMenuIcon :icon="item.meta.icon" />
-          <span v-if="item.meta.title" class="ml-1" :title="translateRouteTitle(item.meta.title)">
-            {{ translateRouteTitle(item.meta.title) }}
+          <span v-if="item.meta.title" class="ml-1" :title="item.meta.title">
+            {{ item.meta.title }}
           </span>
         </template>
       </template>
@@ -59,7 +55,6 @@
 import path from "path-browserify";
 import type { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
-import { translateRouteTitle } from "@/lang/utils";
 import LayoutMenuIcon from "./LayoutMenuIcon.vue";
 
 type SidebarRoute = RouteRecordRaw & {

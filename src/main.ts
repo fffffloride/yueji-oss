@@ -9,7 +9,6 @@ import "animate.css";
 import { setupDirective } from "@/directives";
 import { setupRouter } from "@/router";
 import { setupStore } from "@/stores";
-import { setupI18n } from "@/lang";
 import * as ElementPlusIcons from "@element-plus/icons-vue";
 import { setupPermissionGuard } from "@/router/guards/permission";
 import { setupSse } from "@/composables";
@@ -17,7 +16,6 @@ import { setupSse } from "@/composables";
 const app = createApp(App);
 
 setupDirective(app);
-setupI18n(app);
 setupRouter(app);
 setupStore(app);
 

@@ -26,7 +26,7 @@
             <span v-else class="layout-tabs__item-icon" :class="`i-svg:${tag.icon}`" />
           </template>
           <span class="layout-tabs__item-text">
-            {{ translateRouteTitle(tag.title) }}
+            {{ tag.title }}
           </span>
           <span
             v-if="!tag.affix"
@@ -135,7 +135,6 @@
 import { useRoute, useRouter, type RouteRecordRaw } from "vue-router";
 import { resolve } from "path-browserify";
 import { TagsViewStyle } from "@/enums";
-import { translateRouteTitle } from "@/lang/utils";
 import { useAppStore, usePermissionStore, useSettingsStore, useTagsViewStore } from "@/stores";
 import { isExternal } from "@/utils";
 import type { TagView } from "@/stores/tags-view";

@@ -54,7 +54,6 @@ export const STORAGE_KEYS = {
   // 应用
   DEVICE: `${APP_PREFIX}:app:device`,
   SIZE: `${APP_PREFIX}:app:size`,
-  LANGUAGE: `${APP_PREFIX}:app:language`,
   SIDEBAR_STATUS: `${APP_PREFIX}:app:sidebar_status`,
   ACTIVE_TOP_MENU_PATH: `${APP_PREFIX}:app:active_top_menu_path`,
 } as const;

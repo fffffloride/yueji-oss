@@ -36,7 +36,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
         name: "Dashboard",
         meta: {
-          title: "dashboard",
+          title: "首页",
           icon: "homepage",
           affix: true,
           keepAlive: true,

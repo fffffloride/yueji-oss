@@ -2,7 +2,7 @@
  * 设置相关枚举
  *
  * @description
- * 包含主题、布局、语言、设备等应用设置的枚举定义
+ * 包含主题、布局、设备等应用设置的枚举定义
  */
 import type { OptionItem } from "@/api/common";
 
@@ -111,21 +111,6 @@ export const enum ComponentSize {
    * 小型
    */
   SMALL = "small",
-}
-
-/**
- * 语言枚举
- */
-export const enum LanguageEnum {
-  /**
-   * 中文
-   */
-  ZH_CN = "zh-cn",
-
-  /**
-   * 英文
-   */
-  EN = "en",
 }
 
 /**

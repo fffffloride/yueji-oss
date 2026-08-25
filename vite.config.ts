@@ -58,7 +58,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       // API 自动导入
       AutoImport({
         // 导入 Vue 函数，如：ref, reactive, toRef 等
-        imports: ["vue", "@vueuse/core", "pinia", "vue-router", "vue-i18n"],
+        imports: ["vue", "@vueuse/core", "pinia", "vue-router"],
         resolvers: [
           // 导入 Element Plus函数，如：ElMessage, ElMessageBox 等
           ElementPlusResolver({ importStyle: "sass" }),
@@ -101,14 +101,12 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         "echarts/renderers",
         "echarts/charts",
         "echarts/components",
-        "vue-i18n",
         "nprogress",
         "qs",
         "path-browserify",
         "lodash-es",
         "@element-plus/icons-vue",
         "element-plus/es",
-        "element-plus/es/locale/lang/en",
         "element-plus/es/locale/lang/zh-cn",
         // Element Plus 组件样式预构建（避免按需发现时触发页面重载）
         ...[

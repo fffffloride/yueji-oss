@@ -34,7 +34,7 @@
 - **Simple and Easy-to-use** — A Vue3 upgrade of [vue-element-admin](https://gitee.com/panjiachen/vue-element-admin) with no over-encapsulation, easy to get started.
 - **Permission System** — Dynamic routing, button permissions, role permissions, and data permissions.
 - **Multi-tenant** — Supports multi-tenant mode and tenant isolation.
-- **Infrastructure** — Internationalization, multiple layouts, dark mode, full screen, watermark, API documentation, and code generator.
+- **Infrastructure** — Multiple layouts, dark mode, full screen, watermark, and API documentation.
 - **Data Interaction** — Supports Mock data and online API documentation, with accompanying Java / Node backend source code.
 - **Continuous Updates** — The project is continuously open-sourced and updated, keeping pace with the mainstream tech stack.
 

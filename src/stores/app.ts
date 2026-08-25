@@ -1,5 +1,3 @@
-import zhCn from "element-plus/es/locale/lang/zh-cn";
-import en from "element-plus/es/locale/lang/en";
 import { store } from "@/stores";
 import { DeviceEnum, SidebarStatus } from "@/enums";
 import { STORAGE_KEYS } from "@/constants";
@@ -15,11 +13,6 @@ export const useAppStore = defineStore("app", () => {
    * 组件默认尺寸
    */
   const size = useStorage(STORAGE_KEYS.SIZE, defaults.size);
-
-  /**
-   * 当前语言
-   */
-  const language = useStorage(STORAGE_KEYS.LANGUAGE, defaults.language);
 
   /**
    * 侧边栏持久化状态
@@ -50,11 +43,6 @@ export const useAppStore = defineStore("app", () => {
    * 内容区是否全屏
    */
   const contentFullscreen = ref(false);
-
-  /**
-   * Element Plus 当前语言包
-   */
-  const locale = computed(() => (language?.value === "en" ? en : zhCn));
 
   /**
    * 切换侧边栏展开状态
@@ -102,13 +90,6 @@ export const useAppStore = defineStore("app", () => {
   }
 
   /**
-   * 切换语言
-   */
-  function changeLanguage(val: string) {
-    language.value = val;
-  }
-
-  /**
    * 设置顶部菜单激活路径
    */
   function setActiveTopMenuPath(path: string) {
@@ -126,13 +107,10 @@ export const useAppStore = defineStore("app", () => {
     device,
     sidebar,
     secondarySidebar,
-    language,
-    locale,
     size,
     contentFullscreen,
     toggleDevice,
     changeSize,
-    changeLanguage,
     toggleSidebar,
     closeSidebar,
     openSidebar,
