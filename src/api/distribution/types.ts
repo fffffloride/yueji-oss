@@ -262,3 +262,74 @@ export interface DistributionTaskAssigneeItem {
   completed: boolean;
   progressRateBps: number;
 }
+
+export type AnalyticsGranularity = "DAY" | "MONTH" | "YEAR";
+
+export interface DistributionAnalyticsQuery {
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface DistributionAnalyticsTrend {
+  period: string;
+  totalSalesAmount: number;
+  verifiedOrderCount: number;
+  distributionSalesAmount: number;
+}
+
+export interface DistributionLevelAnalytics {
+  levelId: string;
+  levelName: string;
+  rank: number;
+  approvedAgentCount: number;
+  disabledAgentCount: number;
+  agentCount: number;
+  salesAmount: number;
+  orderCount: number;
+  customerCount: number;
+}
+
+export interface DistributionAnalyticsOverview {
+  startDate: string;
+  endDate: string;
+  granularity: AnalyticsGranularity;
+  summary: {
+    totalSalesAmount: number;
+    verifiedOrderCount: number;
+    distributionSalesAmount: number;
+    performingAgentCount: number;
+  };
+  trend: DistributionAnalyticsTrend[];
+  levels: DistributionLevelAnalytics[];
+}
+
+export interface DistributionAgentAnalyticsQuery
+  extends BaseQueryParams, DistributionAnalyticsQuery {
+  keywords?: string;
+  levelId?: string;
+}
+
+export interface DistributionAgentPerformance {
+  agentId: string;
+  realName: string;
+  mobile?: string | null;
+  levelId?: string | null;
+  levelName?: string | null;
+  status: number;
+  salesAmount: number;
+  orderCount: number;
+  customerCount: number;
+}
+
+export interface DistributionAgentAnalyticsDetail {
+  startDate: string;
+  endDate: string;
+  granularity: AnalyticsGranularity;
+  agent: DistributionAgentPerformance;
+  summary: {
+    salesAmount: number;
+    orderCount: number;
+    customerCount: number;
+  };
+  trend: Array<{ period: string; salesAmount: number }>;
+}

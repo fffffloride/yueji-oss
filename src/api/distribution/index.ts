@@ -11,6 +11,11 @@ import type {
   CommissionItem,
   CommissionQuery,
   DistributionConfigQuery,
+  DistributionAgentAnalyticsDetail,
+  DistributionAgentAnalyticsQuery,
+  DistributionAgentPerformance,
+  DistributionAnalyticsOverview,
+  DistributionAnalyticsQuery,
   DistributionLevelForm,
   DistributionLevelItem,
   DistributionTaskAssigneeItem,
@@ -171,6 +176,32 @@ export const DistributionAPI = {
       url: `${BASE_URL}/tasks/${id}/assignees/page`,
       method: "get",
       params,
+    }),
+
+  getAnalyticsOverview: (params: DistributionAnalyticsQuery) =>
+    request<unknown, DistributionAnalyticsOverview>({
+      url: `${BASE_URL}/analytics/overview`,
+      method: "get",
+      params,
+    }),
+  getAgentAnalyticsPage: (params: DistributionAgentAnalyticsQuery) =>
+    request<unknown, PageResult<DistributionAgentPerformance>>({
+      url: `${BASE_URL}/analytics/agents/page`,
+      method: "get",
+      params,
+    }),
+  getAgentAnalytics: (agentId: string, params: DistributionAnalyticsQuery) =>
+    request<unknown, DistributionAgentAnalyticsDetail>({
+      url: `${BASE_URL}/analytics/agents/${agentId}`,
+      method: "get",
+      params,
+    }),
+  exportAnalytics: (params: DistributionAnalyticsQuery) =>
+    request({
+      url: `${BASE_URL}/analytics/export`,
+      method: "get",
+      params,
+      responseType: "blob",
     }),
 };
 
