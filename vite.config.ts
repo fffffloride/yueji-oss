@@ -106,7 +106,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         "nprogress",
         "sortablejs",
         "qs",
-        "vxe-table",
         "path-browserify",
         "lodash-es",
         "@element-plus/icons-vue",
