@@ -1,6 +1,6 @@
 <div align="center">
 
-<img alt="logo" width="40" valign="middle" src="./src/assets/images/logo.png"> vue3-element-admin
+<img alt="logo" width="40" valign="middle" src="./src/assets/images/logo.png"> 悦己
 
 **Vue3 + Vite + TypeScript Enterprise Admin Frontend**
 

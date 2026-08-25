@@ -41,15 +41,6 @@
             <span>GitCode</span>
           </a>
           <a
-            href="https://juejin.cn/post/7228990409909108793"
-            target="_blank"
-            title="文档"
-            class="quick-link"
-          >
-            <el-icon><Document /></el-icon>
-            <span>文档</span>
-          </a>
-          <a
             href="https://www.bilibili.com/video/BV1eFUuYyEFj"
             target="_blank"
             title="视频"
@@ -258,7 +249,6 @@ import {
   ArrowDown,
   Clock,
   CircleCheck,
-  Document,
   VideoPlay,
 } from "@element-plus/icons-vue";
 import { useOnlineUsers } from "@/composables";

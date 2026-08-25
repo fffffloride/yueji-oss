@@ -26,12 +26,6 @@ importers:
       axios:
         specifier: ^1.18.0
         version: 1.19.0
-      codemirror:
-        specifier: ^5.65.21
-        version: 5.65.21
-      codemirror-editor-vue3:
-        specifier: ^2.8.0
-        version: 2.8.0(codemirror@5.65.21)(diff-match-patch@1.0.5)(vue@3.5.41)
       echarts:
         specifier: ^6.1.0
         version: 6.1.0
@@ -62,9 +56,6 @@ importers:
       qs:
         specifier: ^6.15.2
         version: 6.15.3
-      sortablejs:
-        specifier: ^1.15.7
-        version: 1.15.7
       vue:
         specifier: ^3.5.38
         version: 3.5.41(typescript@5.9.3)
@@ -87,9 +78,6 @@ importers:
       '@iconify/utils':
         specifier: ^3.1.3
         version: 3.1.4
-      '@types/codemirror':
-        specifier: ^5.60.17
-        version: 5.60.18
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -108,9 +96,6 @@ importers:
       '@types/qs':
         specifier: ^6.15.1
         version: 6.15.1
-      '@types/sortablejs':
-        specifier: ^1.15.9
-        version: 1.15.9
       '@vitejs/plugin-vue':
         specifier: ^6.0.7
         version: 6.0.8(vite@8.0.6)(vue@3.5.41)
@@ -1496,12 +1481,6 @@ packages:
       tslib: 2.8.1
     optional: true
 
-  /@types/codemirror@5.60.18:
-    resolution: {integrity: sha512-aSBOPXH2PXRYixxUpVP1sJ5+S0vEfKDvR+lABZ7Kju/9Qb0SSbZk72NihWaKoQbANyibs92q4DBfYasywxnNkA==}
-    dependencies:
-      '@types/tern': 0.23.9
-    dev: true
-
   /@types/esrecurse@4.3.1:
     resolution: {integrity: sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==}
     dev: true
@@ -1560,16 +1539,6 @@ packages:
   /@types/retry@0.12.2:
     resolution: {integrity: sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==}
     dev: false
-
-  /@types/sortablejs@1.15.9:
-    resolution: {integrity: sha512-7HP+rZGE2p886PKV9c9OJzLBI6BBJu1O7lJGYnPyG3fS4/duUCcngkNCjsLwIMV+WMqANe3tt4irrXHSIe68OQ==}
-    dev: true
-
-  /@types/tern@0.23.9:
-    resolution: {integrity: sha512-ypzHFE/wBzh+BlH6rrBgS5I/Z7RD21pGhZ2rltb/+ZrVM1awdZwjx7hE5XfuYgHWk9uvV5HLZN3SloevCAp3Bw==}
-    dependencies:
-      '@types/estree': 1.0.9
-    dev: true
 
   /@types/web-bluetooth@0.0.21:
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
@@ -2795,22 +2764,6 @@ packages:
       type-is: 1.6.18
     dev: true
 
-  /codemirror-editor-vue3@2.8.0(codemirror@5.65.21)(diff-match-patch@1.0.5)(vue@3.5.41):
-    resolution: {integrity: sha512-ebYGNhBpLmQNLguXzNyMMkn6K8v3lcS5/Ncvdn6YS4bLGEHE67MfsJIS/WV0L7I6WavUuFlY/Rs/AJKChIwSwg==}
-    peerDependencies:
-      codemirror: ^5
-      diff-match-patch: ^1.0.5
-      vue: ^3.x
-    dependencies:
-      codemirror: 5.65.21
-      diff-match-patch: 1.0.5
-      vue: 3.5.41(typescript@5.9.3)
-    dev: false
-
-  /codemirror@5.65.21:
-    resolution: {integrity: sha512-6teYk0bA0nR3QP0ihGMoxuKzpl5W80FpnHpBJpgy66NK3cZv5b/d/HY8PnRvfSsCG1MTfr92u2WUl+wT0E40mQ==}
-    dev: false
-
   /color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
     dependencies:
@@ -3149,10 +3102,6 @@ packages:
       asap: 2.0.6
       wrappy: 1.0.2
     dev: true
-
-  /diff-match-patch@1.0.5:
-    resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
-    dev: false
 
   /dijkstrajs@1.0.3:
     resolution: {integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==}
@@ -5544,10 +5493,6 @@ packages:
   /snabbdom@3.6.4:
     resolution: {integrity: sha512-VmxEfuw1/Y/eFj5VtMhYnukExpYiPkNzoo3+N3qwAOUDMl8wXgbli5ebR+j0knE3lZ/0eYskLxNcX64uy10N9w==}
     engines: {node: '>=12.17.0'}
-    dev: false
-
-  /sortablejs@1.15.7:
-    resolution: {integrity: sha512-Kk8wLQPlS+yi1ZEf48a4+fzHa4yxjC30M/Sr2AnQu+f/MPwvvX9XjZ6OWejiz8crBsLwSq8GHqaxaET7u6ux0A==}
     dev: false
 
   /source-map-js@1.2.1:

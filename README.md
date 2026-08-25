@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img alt="logo" width="40" valign="middle" src="./src/assets/images/logo.png"> vue3-element-admin
+# <img alt="logo" width="40" valign="middle" src="./src/assets/images/logo.png"> 悦己
 
 **Vue3 + Vite + TypeScript 企业级中后台前端**
 
@@ -35,7 +35,7 @@
 - **简洁易用** — 基于 [vue-element-admin](https://gitee.com/panjiachen/vue-element-admin) 升级的 Vue3 版本，无过度封装，易上手
 - **权限体系** — 动态路由、按钮权限、角色权限和数据权限
 - **多租户** — 支持多租户模式与租户隔离
-- **基础设施** — 国际化、多布局、暗黑模式、全屏、水印、接口文档、代码生成器
+- **基础设施** — 国际化、多布局、暗黑模式、全屏、水印、接口文档
 - **数据交互** — 支持 Mock 数据与线上接口文档，配套 Java / Node 后端源码
 - **持续更新** — 项目持续开源更新，跟进主流技术栈
 
@@ -210,4 +210,3 @@ pnpm run build
 </table>
 
 <p align="center"><em>技术交流 · 问题反馈 · 商务合作</em></p>
-
