@@ -205,3 +205,60 @@ export interface SettlementRunResult {
   amountSettled: number;
   withdrawalsCreated?: number;
 }
+
+export type DistributionTaskMetric = "SALES_AMOUNT" | "ORDER_COUNT";
+export type DistributionTaskScope = "ALL" | "LEVEL" | "AGENT";
+export type DistributionTaskDisplayStatus =
+  "DRAFT" | "NOT_STARTED" | "IN_PROGRESS" | "FINISHED" | "CANCELLED";
+
+export interface DistributionTaskForm {
+  name: string;
+  description?: string;
+  metricType: DistributionTaskMetric;
+  targetValue: number;
+  startTime: string;
+  endTime: string;
+  assignmentScope: DistributionTaskScope;
+  targetLevelId?: string;
+  targetAgentIds?: string[];
+}
+
+export interface DistributionTaskItem extends DistributionTaskForm {
+  id: string;
+  status: number;
+  displayStatus: DistributionTaskDisplayStatus;
+  publishedTime?: string | null;
+  cancelledTime?: string | null;
+  totalAssignees: number;
+  completedCount: number;
+  incompleteCount: number;
+  createTime?: string;
+}
+
+export interface DistributionTaskQuery extends BaseQueryParams {
+  keywords?: string;
+  status?: number;
+  displayStatus?: DistributionTaskDisplayStatus;
+  metricType?: DistributionTaskMetric;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface DistributionTaskAssigneeQuery extends BaseQueryParams {
+  keywords?: string;
+  completed?: number;
+}
+
+export interface DistributionTaskAssigneeItem {
+  assignmentId: string;
+  agentId: string;
+  agentName?: string | null;
+  mobile?: string | null;
+  levelId?: string | null;
+  agentStatus?: number | null;
+  salesAmount: number;
+  orderCount: number;
+  currentValue: number;
+  completed: boolean;
+  progressRateBps: number;
+}

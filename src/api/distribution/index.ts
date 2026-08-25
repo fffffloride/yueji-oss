@@ -13,6 +13,11 @@ import type {
   DistributionConfigQuery,
   DistributionLevelForm,
   DistributionLevelItem,
+  DistributionTaskAssigneeItem,
+  DistributionTaskAssigneeQuery,
+  DistributionTaskForm,
+  DistributionTaskItem,
+  DistributionTaskQuery,
   SettlementConfig,
   SettlementItem,
   SettlementQuery,
@@ -144,6 +149,28 @@ export const DistributionAPI = {
       url: `${BASE_URL}/withdrawals/${id}/paid`,
       method: "put",
       data: { transferNo, remark },
+    }),
+
+  getTaskPage: (params: DistributionTaskQuery) =>
+    request<unknown, PageResult<DistributionTaskItem>>({
+      url: `${BASE_URL}/tasks/page`,
+      method: "get",
+      params,
+    }),
+  getTaskDetail: (id: string) =>
+    request<unknown, DistributionTaskItem>({ url: `${BASE_URL}/tasks/${id}`, method: "get" }),
+  createTask: (data: DistributionTaskForm) =>
+    request({ url: `${BASE_URL}/tasks`, method: "post", data }),
+  updateTask: (id: string, data: DistributionTaskForm) =>
+    request({ url: `${BASE_URL}/tasks/${id}`, method: "put", data }),
+  deleteTask: (id: string) => request({ url: `${BASE_URL}/tasks/${id}`, method: "delete" }),
+  publishTask: (id: string) => request({ url: `${BASE_URL}/tasks/${id}/publish`, method: "post" }),
+  cancelTask: (id: string) => request({ url: `${BASE_URL}/tasks/${id}/cancel`, method: "post" }),
+  getTaskAssigneePage: (id: string, params: DistributionTaskAssigneeQuery) =>
+    request<unknown, PageResult<DistributionTaskAssigneeItem>>({
+      url: `${BASE_URL}/tasks/${id}/assignees/page`,
+      method: "get",
+      params,
     }),
 };
 
