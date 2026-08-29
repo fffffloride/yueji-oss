@@ -268,32 +268,6 @@
           <el-form-item label="外链地址" prop="externalUrl">
             <el-input v-model="formData.externalUrl" placeholder="https://example.com" clearable />
           </el-form-item>
-
-          <el-form-item label="打开方式" prop="component">
-            <el-radio-group v-model="formData.component" @change="handleComponentChange">
-              <el-radio value="">新标签页</el-radio>
-              <el-radio value="iframe">系统内嵌</el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <template v-if="isEmbeddedExternal">
-            <el-form-item prop="routePath">
-              <template #label>
-                <div class="flex-y-center">
-                  路由路径
-                  <el-tooltip
-                    content="内嵌外链在地址栏显示的路由路径，例如 apifox"
-                    placement="bottom"
-                  >
-                    <el-icon class="ml-1 cursor-pointer">
-                      <QuestionFilled />
-                    </el-icon>
-                  </el-tooltip>
-                </div>
-              </template>
-              <el-input v-model="formData.routePath" placeholder="apifox" />
-            </el-form-item>
-          </template>
         </template>
 
         <template v-if="showPermissionConfig">
@@ -501,11 +475,6 @@ const showMenuScope = computed(() => isTenantEnabled());
 // 抽屉宽度（响应式）。
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
-// 系统内嵌外链需要一个内部路由承载 iframe 页面。
-const isEmbeddedExternal = computed(
-  () => formData.type === MenuTypeEnum.EXTERNAL && formData.component === "iframe"
-);
-
 const showCatalogConfig = computed(() => formData.type === MenuTypeEnum.CATALOG);
 
 const showPageConfig = computed(() => formData.type === MenuTypeEnum.MENU);
@@ -515,29 +484,20 @@ const showExternalConfig = computed(() => formData.type === MenuTypeEnum.EXTERNA
 const showPermissionConfig = computed(() => formData.type === MenuTypeEnum.BUTTON);
 
 const showRoutePath = computed(
-  () =>
-    formData.type === MenuTypeEnum.CATALOG ||
-    formData.type === MenuTypeEnum.MENU ||
-    isEmbeddedExternal.value
+  () => formData.type === MenuTypeEnum.CATALOG || formData.type === MenuTypeEnum.MENU
 );
 
 const showCatalogDisplay = computed(() => formData.type === MenuTypeEnum.CATALOG);
 
-const showPageCache = computed(
-  () => formData.type === MenuTypeEnum.MENU || isEmbeddedExternal.value
-);
+const showPageCache = computed(() => formData.type === MenuTypeEnum.MENU);
 
 const showRouteName = computed(() => showPageCache.value && isStatusEnabled(formData.keepAlive));
 
 const showRouteParams = computed(() => formData.type === MenuTypeEnum.MENU);
 
-const routeNameTooltip = computed(() =>
-  isEmbeddedExternal.value
-    ? "开启缓存时填写，需和内嵌页路由名称保持一致，例如 Apifox"
-    : "开启缓存时填写，需和页面组件 name 保持一致，例如 User"
-);
+const routeNameTooltip = "开启缓存时填写，需和页面组件 name 保持一致，例如 User";
 
-const routeNamePlaceholder = computed(() => (isEmbeddedExternal.value ? "Apifox" : "User"));
+const routeNamePlaceholder = "User";
 
 const menuTypeHint = computed(() => {
   if (formData.type === MenuTypeEnum.CATALOG) {
@@ -549,7 +509,7 @@ const menuTypeHint = computed(() => {
   }
 
   if (formData.type === MenuTypeEnum.EXTERNAL) {
-    return "打开第三方地址，可新开页或系统内嵌";
+    return "在新标签页打开第三方地址";
   }
 
   if (formData.type === MenuTypeEnum.BUTTON) {
@@ -590,10 +550,6 @@ function createMenuTypeDrafts(): Record<MenuTypeEnum, Partial<MenuForm>> {
     [MenuTypeEnum.EXTERNAL]: {
       externalUrl: "",
       icon: "",
-      component: "",
-      routeName: "",
-      routePath: "",
-      keepAlive: 1,
     },
     [MenuTypeEnum.BUTTON]: {
       perm: "",
@@ -778,20 +734,14 @@ function normalizeMenuPayload(): MenuForm {
   }
 
   if (payload.type === MenuTypeEnum.EXTERNAL) {
+    payload.routeName = undefined;
+    payload.routePath = undefined;
+    payload.component = undefined;
     payload.perm = undefined;
     payload.redirect = undefined;
+    payload.keepAlive = undefined;
     payload.alwaysShow = undefined;
     payload.params = [];
-
-    if (!payload.component) {
-      // 新标签页：不需要路由名称、路径、缓存
-      payload.routeName = undefined;
-      payload.routePath = undefined;
-      payload.keepAlive = undefined;
-    } else if (!isStatusEnabled(payload.keepAlive)) {
-      // 内嵌但未开启缓存：不需要路由名称
-      payload.routeName = undefined;
-    }
   }
 
   if (payload.type === MenuTypeEnum.BUTTON) {
@@ -923,10 +873,6 @@ function applyMenuTypeDefaults(): void {
     formData.params = [];
   }
 
-  if (formData.type === MenuTypeEnum.EXTERNAL && formData.component === "iframe") {
-    formData.keepAlive ??= 1;
-  }
-
   if (formData.type === MenuTypeEnum.BUTTON) {
     formData.icon = undefined;
   }
@@ -944,17 +890,6 @@ function handleMenuTypeChange(): void {
   restoreMenuTypeDraft(nextType);
 
   nextTick(() => menuFormRef.value?.clearValidate());
-}
-
-/**
- * 外链组件切换事件（新标签页 → 系统内嵌）
- */
-function handleComponentChange(): void {
-  if (formData.component === "iframe") {
-    formData.keepAlive ??= 1;
-  }
-
-  nextTick(() => menuFormRef.value?.clearValidate(["routeName", "routePath"]));
 }
 
 /**

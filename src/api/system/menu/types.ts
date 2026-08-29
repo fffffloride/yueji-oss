@@ -124,8 +124,6 @@ export interface Meta {
   keepAlive?: boolean;
   /** 路由参数 */
   params?: Record<string, unknown>;
-  /** 外链地址 */
-  externalUrl?: string;
   /** 角色集合 */
   roles?: string[];
   /** 路由title */

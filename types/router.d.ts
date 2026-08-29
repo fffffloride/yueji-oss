@@ -15,7 +15,6 @@ declare module "vue-router" {
     breadcrumb?: boolean;
     activeMenu?: string;
     params?: Record<string, unknown>;
-    externalUrl?: string;
     roles?: string[];
   }
 }

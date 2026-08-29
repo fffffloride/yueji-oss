@@ -15,7 +15,6 @@ defineOptions({
 interface AppLinkTo {
   path: string;
   meta?: {
-    externalUrl?: string;
     type?: string;
   };
   query?: Record<string, unknown> | null;
