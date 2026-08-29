@@ -9,7 +9,7 @@
 -->
 
 <template>
-  <div style="z-index: 999; border: 1px solid var(--el-border-color)">
+  <div class="wang-editor">
     <!-- 工具栏 -->
     <Toolbar
       v-if="editorRef"
@@ -17,13 +17,13 @@
       :editor="editorRef"
       mode="simple"
       :default-config="toolbarConfig"
-      style="border-bottom: 1px solid var(--el-border-color)"
+      class="wang-editor__toolbar"
     />
     <!-- 编辑器 -->
     <Editor
       :key="editorKey"
       v-model="modelValue"
-      :style="{ height: height, overflowY: 'hidden' }"
+      :style="{ height: height }"
       :default-config="editorConfig"
       mode="simple"
       @on-created="handleCreated"
@@ -106,3 +106,28 @@ onBeforeUnmount(() => {
   editor.destroy();
 });
 </script>
+
+<style scoped lang="scss">
+.wang-editor {
+  position: relative;
+  z-index: 2;
+  border: 1px solid var(--el-border-color);
+
+  &__toolbar {
+    border-bottom: 1px solid var(--el-border-color);
+  }
+
+  :deep(.w-e-text-container) {
+    overflow: visible;
+  }
+
+  :deep(.w-e-scroll) {
+    overflow-y: auto;
+  }
+
+  :deep(.w-e-modal),
+  :deep(.w-e-drop-panel) {
+    z-index: 20;
+  }
+}
+</style>

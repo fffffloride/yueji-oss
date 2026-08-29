@@ -19,7 +19,7 @@
           v-hasPerm="'biz:points:rule'"
           type="primary"
           :loading="ruleSaving"
-          @click="saveRule"
+          @click="handleSaveRule"
         >
           保存规则
         </el-button>
@@ -99,7 +99,7 @@
 
 <script setup lang="ts">
 import { Refresh } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 import { PointsAPI, type PointsLog, type PointsLogQuery, type PointsRule } from "@/api/marketing";
 import { usePageTable } from "@/composables";
@@ -141,7 +141,12 @@ async function loadRule() {
   Object.assign(rule, await PointsAPI.getRule());
 }
 
-async function saveRule() {
+async function handleSaveRule() {
+  await ElMessageBox.confirm(
+    `每实付1元赠送 ${rule.earnPerYuan} 积分，抵扣1元需要 ${rule.redeemPointsPerYuan} 积分，单笔最高抵扣 ${maxRatePercent.value}%。保存后仅影响后续订单。`,
+    "确认保存积分规则",
+    { type: "warning" }
+  );
   ruleSaving.value = true;
   try {
     await PointsAPI.updateRule(rule);
@@ -160,7 +165,10 @@ function bizTypeLabel(value: string) {
   return bizTypes.find((item) => item.value === value)?.label ?? value;
 }
 
-loadRule();
+onMounted(() => {
+  loadRule();
+  handleQuery();
+});
 </script>
 
 <style scoped>

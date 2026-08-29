@@ -180,15 +180,21 @@
         <el-form-item label="疼痛友好">
           <el-switch v-model="formData.painFriendly" />
         </el-form-item>
-        <el-form-item label="主图" prop="mainImage">
-          <SingleImageUpload v-model="formData.mainImage" />
+        <el-form-item label="主图" prop="mainImage" required>
+          <div>
+            <SingleImageUpload v-model="formData.mainImage" />
+            <p class="form-tip">建议比例 10:9</p>
+          </div>
         </el-form-item>
-        <el-form-item label="轮播图" prop="album">
-          <MultiImageUpload v-model="albumList" :limit="6" />
+        <el-form-item label="轮播图" prop="album" required>
+          <div>
+            <MultiImageUpload v-model="formData.album" :limit="6" />
+            <p class="form-tip">建议比例 6:5</p>
+          </div>
         </el-form-item>
-        <el-form-item label="划线原价" prop="originalPriceYuan">
+        <el-form-item label="划线原价" prop="originalPriceYuan" required>
           <el-input-number
-            v-model="originalPriceYuan"
+            v-model="formData.originalPriceYuan"
             :min="0"
             :precision="2"
             controls-position="right"
@@ -211,74 +217,81 @@
           </el-radio-group>
         </el-form-item>
 
-        <el-divider content-position="left">规格 SKU</el-divider>
-        <el-table :data="formData.skus" border size="small" style="margin-bottom: 8px">
-          <el-table-column label="规格名称" min-width="140">
-            <template #default="scope">
-              <el-input v-model="scope.row.name" placeholder="如：1ml装" size="small" />
-            </template>
-          </el-table-column>
-          <el-table-column label="售价(元)" width="130">
-            <template #default="scope">
-              <el-input-number
-                v-model="scope.row.priceYuan"
-                :min="0"
-                :precision="2"
-                size="small"
-                controls-position="right"
-                style="width: 110px"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="原价(元)" width="130">
-            <template #default="scope">
-              <el-input-number
-                v-model="scope.row.originalPriceYuan"
-                :min="0"
-                :precision="2"
-                size="small"
-                controls-position="right"
-                style="width: 110px"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="库存" width="110">
-            <template #default="scope">
-              <el-input-number
-                v-model="scope.row.stock"
-                :min="0"
-                size="small"
-                controls-position="right"
-                style="width: 90px"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="启用" width="70" align="center">
-            <template #default="scope">
-              <el-switch
-                :model-value="scope.row.status !== 0"
-                size="small"
-                @change="(val: string | number | boolean) => (scope.row.status = val ? 1 : 0)"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="60" align="center">
-            <template #default="scope">
-              <el-button
-                type="danger"
-                link
-                size="small"
-                :disabled="formData.skus.length <= 1"
-                @click="formData.skus.splice(scope.$index, 1)"
-              >
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-button size="small" style="margin-bottom: 16px" @click="addSku">+ 添加规格</el-button>
+        <el-form-item label="规格SKU" prop="skus">
+          <el-table :data="formData.skus" border size="small" class="mb-8px">
+            <el-table-column label="规格名称" min-width="140">
+              <template #default="scope">
+                <el-input
+                  v-model="scope.row.name"
+                  placeholder="如：1ml装"
+                  size="small"
+                  @change="validateSkus"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="售价(元)" width="130">
+              <template #default="scope">
+                <el-input-number
+                  v-model="scope.row.priceYuan"
+                  :min="0"
+                  :precision="2"
+                  size="small"
+                  controls-position="right"
+                  style="width: 110px"
+                  @change="validateSkus"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="原价(元)" width="130">
+              <template #default="scope">
+                <el-input-number
+                  v-model="scope.row.originalPriceYuan"
+                  :min="0"
+                  :precision="2"
+                  size="small"
+                  controls-position="right"
+                  style="width: 110px"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="库存" width="110">
+              <template #default="scope">
+                <el-input-number
+                  v-model="scope.row.stock"
+                  :min="0"
+                  size="small"
+                  controls-position="right"
+                  style="width: 90px"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="启用" width="70" align="center">
+              <template #default="scope">
+                <el-switch
+                  :model-value="scope.row.status !== 0"
+                  size="small"
+                  @change="(val: string | number | boolean) => (scope.row.status = val ? 1 : 0)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="60" align="center">
+              <template #default="scope">
+                <el-button
+                  type="danger"
+                  link
+                  size="small"
+                  :disabled="formData.skus.length <= 1"
+                  @click="removeSku(scope.$index)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-button size="small" @click="addSku">+ 添加规格</el-button>
+        </el-form-item>
 
-        <el-form-item label="商品详情" prop="detail">
+        <el-form-item label="商品详情" prop="detail" required>
           <WangEditor v-model="formData.detail" height="300px" />
         </el-form-item>
         <el-form-item label="产品说明" prop="usageNote">
@@ -326,6 +339,24 @@ const toCents = (yuan?: number | null) =>
 
 const parseTags = (tags?: string) => (tags ? tags.split(",").filter(Boolean) : []);
 
+function isBlankHtml(html?: string): boolean {
+  if (!html) return true;
+  return (
+    html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .trim().length === 0
+  );
+}
+
+function hasUploadedUrl(url?: string | null): boolean {
+  return !!url?.trim();
+}
+
+function hasUploadedUrls(urls?: string[] | null): boolean {
+  return !!urls?.some((url) => url?.trim());
+}
+
 type SkuRow = {
   id?: string;
   name: string;
@@ -354,23 +385,76 @@ const queryParams = reactive<ProductQueryParams>({
 
 const drawerState = reactive({ title: "", visible: false });
 
-type FormState = Omit<ProductForm, "skus"> & { skus: SkuRow[] };
+type FormState = Omit<ProductForm, "skus" | "album" | "originalPrice"> & {
+  skus: SkuRow[];
+  album: string[];
+  originalPriceYuan?: number;
+};
 
 const initialFormData: FormState = {
   painFriendly: false,
   status: 0,
   sort: 0,
   skus: [],
+  album: [],
+  mainImage: "",
+  detail: "",
 };
 
-const formData = reactive<FormState>({ ...initialFormData, skus: [] });
+const formData = reactive<FormState>({ ...initialFormData, skus: [], album: [] });
 const tagList = ref<string[]>([]);
-const albumList = ref<string[]>([]);
-const originalPriceYuan = ref<number>();
 
 const rules: FormRules = {
   name: [{ required: true, message: "商品名称不能为空", trigger: "blur" }],
   categoryId: [{ required: true, message: "请选择分类", trigger: "change" }],
+  mainImage: [
+    {
+      required: true,
+      validator: (_rule, value, callback) => {
+        if (!hasUploadedUrl(value)) callback(new Error("请上传主图"));
+        else callback();
+      },
+      trigger: "change",
+    },
+  ],
+  album: [
+    {
+      type: "array",
+      required: true,
+      validator: (_rule, value, callback) => {
+        if (!hasUploadedUrls(value)) callback(new Error("请至少上传一张轮播图"));
+        else callback();
+      },
+      trigger: "change",
+    },
+  ],
+  originalPriceYuan: [{ required: true, message: "请填写划线原价", trigger: "change" }],
+  skus: [
+    {
+      type: "array",
+      required: true,
+      validator: (_rule, value, callback) => {
+        if (!Array.isArray(value) || value.length === 0) {
+          callback(new Error("至少需要一个SKU"));
+          return;
+        }
+        const incomplete = value.some((sku: SkuRow) => !sku.name?.trim() || sku.priceYuan == null);
+        if (incomplete) callback(new Error("请完整填写SKU的规格名称和售价"));
+        else callback();
+      },
+      trigger: "change",
+    },
+  ],
+  detail: [
+    {
+      required: true,
+      validator: (_rule, value, callback) => {
+        if (isBlankHtml(value)) callback(new Error("请填写商品详情"));
+        else callback();
+      },
+      trigger: "change",
+    },
+  ],
 };
 
 function toOptions(nodes: CategoryNode[]): OptionItem[] {
@@ -408,12 +492,47 @@ function handleResetQuery(): void {
   fetchData();
 }
 
+function createSkuRow(): SkuRow {
+  return { name: "", priceYuan: undefined, stock: 0, status: 1 };
+}
+
+function validateSkus(): void {
+  formRef.value?.validateField("skus");
+}
+
 function addSku(): void {
-  formData.skus.push({ name: "", priceYuan: undefined, stock: 0, status: 1 });
+  formData.skus.push(createSkuRow());
+  validateSkus();
+}
+
+function removeSku(index: number): void {
+  if (formData.skus.length <= 1) return;
+  formData.skus.splice(index, 1);
+  validateSkus();
+}
+
+function resetForm(): void {
+  tagList.value = [];
+  Object.assign(formData, {
+    ...initialFormData,
+    id: undefined,
+    name: "",
+    categoryId: undefined,
+    subTitle: "",
+    mainImage: "",
+    album: [],
+    originalPriceYuan: undefined,
+    painFriendly: false,
+    detail: "",
+    usageNote: "",
+    skus: [createSkuRow()],
+  });
+  formRef.value?.clearValidate();
 }
 
 async function openDrawer(productId?: string): Promise<void> {
   await loadCategoryOptions();
+  resetForm();
   drawerState.visible = true;
 
   if (productId) {
@@ -424,28 +543,29 @@ async function openDrawer(productId?: string): Promise<void> {
       name: data.name,
       categoryId: data.categoryId ? String(data.categoryId) : undefined,
       subTitle: data.subTitle ?? undefined,
-      mainImage: data.mainImage ?? undefined,
+      mainImage: data.mainImage ?? "",
+      album: ((data.album as string[]) ?? []).filter((url) => url?.trim()),
       videoUrl: data.videoUrl ?? undefined,
       painFriendly: Boolean(data.painFriendly),
+      originalPriceYuan: data.originalPrice != null ? data.originalPrice / 100 : undefined,
       detail: data.detail ?? "",
       usageNote: data.usageNote ?? undefined,
       status: data.status,
       sort: data.sort,
-      skus: (data.skus ?? []).map((s) => ({
-        id: s.id,
-        name: s.name,
-        priceYuan: s.price / 100,
-        originalPriceYuan: s.originalPrice != null ? s.originalPrice / 100 : undefined,
-        stock: s.stock,
-        status: s.status ?? 1,
-      })),
+      skus: data.skus?.length
+        ? data.skus.map((s) => ({
+            id: s.id,
+            name: s.name,
+            priceYuan: s.price / 100,
+            originalPriceYuan: s.originalPrice != null ? s.originalPrice / 100 : undefined,
+            stock: s.stock,
+            status: s.status ?? 1,
+          }))
+        : [createSkuRow()],
     });
     tagList.value = parseTags(data.tags);
-    albumList.value = (data.album as string[]) ?? [];
-    originalPriceYuan.value = data.originalPrice != null ? data.originalPrice / 100 : undefined;
   } else {
     drawerState.title = "新增商品";
-    formData.skus = [{ name: "默认规格", priceYuan: undefined, stock: 0, status: 1 }];
   }
 }
 
@@ -455,16 +575,12 @@ async function handleSubmit(): Promise<void> {
     () => false
   );
   if (!valid) return;
-
-  if (formData.skus.length === 0) {
-    ElMessage.warning("至少需要一个SKU");
+  if (!hasUploadedUrl(formData.mainImage) || !hasUploadedUrls(formData.album)) {
+    await Promise.all([
+      formRef.value?.validateField("mainImage"),
+      formRef.value?.validateField("album"),
+    ]);
     return;
-  }
-  for (const sku of formData.skus) {
-    if (!sku.name || sku.priceYuan === undefined) {
-      ElMessage.warning("请完整填写SKU的规格名称和售价");
-      return;
-    }
   }
   if (formData.status === 1 && !formData.skus.some((sku) => sku.status !== 0)) {
     ElMessage.warning("上架商品至少需要一个启用的SKU");
@@ -475,13 +591,13 @@ async function handleSubmit(): Promise<void> {
     name: formData.name,
     categoryId: formData.categoryId,
     subTitle: formData.subTitle || undefined,
-    mainImage: formData.mainImage || undefined,
-    album: albumList.value.length ? albumList.value : undefined,
+    mainImage: formData.mainImage,
+    album: formData.album.filter((url) => url?.trim()),
     videoUrl: formData.videoUrl || undefined,
     tags: tagList.value.length ? tagList.value.join(",") : undefined,
     painFriendly: Boolean(formData.painFriendly),
-    originalPrice: toCents(originalPriceYuan.value),
-    detail: formData.detail || undefined,
+    originalPrice: toCents(formData.originalPriceYuan),
+    detail: formData.detail,
     usageNote: formData.usageNote || undefined,
     status: formData.status,
     sort: formData.sort,
@@ -536,14 +652,7 @@ async function handleDelete(id: string): Promise<void> {
 
 function closeDrawer(): void {
   drawerState.visible = false;
-  formRef.value?.resetFields();
-  Object.keys(formData).forEach((key) => {
-    delete (formData as Record<string, unknown>)[key];
-  });
-  Object.assign(formData, { ...initialFormData, skus: [] });
-  tagList.value = [];
-  albumList.value = [];
-  originalPriceYuan.value = undefined;
+  resetForm();
 }
 
 onMounted(() => {
@@ -551,3 +660,12 @@ onMounted(() => {
   fetchData();
 });
 </script>
+
+<style scoped>
+.form-tip {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--el-text-color-secondary);
+}
+</style>

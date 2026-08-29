@@ -511,7 +511,10 @@ function formatFen(value: number) {
 function recordStatus(status: number) {
   return ["未使用", "已锁定", "已使用", "已过期"][status] || status;
 }
-loadOptions();
+onMounted(() => {
+  loadOptions();
+  handleQuery();
+});
 </script>
 
 <style scoped>

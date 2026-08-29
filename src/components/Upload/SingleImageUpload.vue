@@ -12,23 +12,27 @@
   >
     <template #default>
       <template v-if="modelValue">
-        <el-image
-          class="single-upload__image"
-          :src="modelValue"
-          :preview-src-list="[modelValue]"
-          @click.stop
-        />
-        <el-icon class="single-upload__delete-btn" @click.stop="handleDelete">
-          <CircleCloseFilled />
-        </el-icon>
+        <img class="single-upload__image" :src="modelValue" />
+        <span class="single-upload__actions" @click.stop>
+          <span @click="openPreview">
+            <el-icon><ZoomIn /></el-icon>
+          </span>
+          <span @click="handleDelete">
+            <el-icon><Delete /></el-icon>
+          </span>
+        </span>
       </template>
-      <template v-else>
-        <el-icon>
-          <Plus />
-        </el-icon>
-      </template>
+      <el-icon v-else>
+        <Plus />
+      </el-icon>
     </template>
   </el-upload>
+  <el-image-viewer
+    v-if="previewVisible"
+    :url-list="[modelValue]"
+    teleported
+    @close="previewVisible = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -84,6 +88,7 @@ const props = defineProps({
 });
 
 const modelValue = defineModel<string>({ default: "" });
+const previewVisible = ref(false);
 
 /**
  * 限制用户上传文件的格式和大小
@@ -152,6 +157,10 @@ function handleDelete() {
   modelValue.value = "";
 }
 
+function openPreview() {
+  previewVisible.value = true;
+}
+
 /**
  * 上传成功回调
  *
@@ -178,26 +187,38 @@ const onError = (error: unknown) => {
   position: relative;
   width: v-bind("props.style.width ?? '150px'");
   height: v-bind("props.style.height ?? '150px'");
+  overflow: hidden;
 }
 
 .single-upload {
   &__image {
-    border-radius: 6px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  &__delete-btn {
+  &__actions {
     position: absolute;
-    top: 1px;
-    right: 1px;
-    font-size: 16px;
-    color: #ff7901;
-    cursor: pointer;
-    background: var(--el-bg-color);
-    border-radius: 100%;
+    inset: 0;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--el-color-white);
+    cursor: default;
+    background: var(--el-overlay-color-lighter);
+    opacity: 0;
+    transition: opacity var(--el-transition-duration);
 
-    :hover {
-      color: #ff4500;
+    span {
+      cursor: pointer;
     }
   }
+}
+
+:deep(.el-upload--picture-card:hover) .single-upload__actions {
+  opacity: 1;
 }
 </style>

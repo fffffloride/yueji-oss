@@ -12,6 +12,14 @@ const AppointmentAPI = {
       params: queryParams,
     });
   },
+
+  getCalendar(month: string) {
+    return request<unknown, AppointmentItem[]>({
+      url: `${APPOINTMENT_BASE_URL}/calendar`,
+      method: "get",
+      params: { month },
+    });
+  },
 };
 
 export default AppointmentAPI;
