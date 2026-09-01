@@ -1,5 +1,24 @@
 <template>
   <div class="page-container">
+    <el-card v-loading="configLoading" class="page-search" shadow="never">
+      <el-form :inline="true" label-suffix=":">
+        <el-form-item label="每时段预约上限">
+          <el-input-number v-model="slotCapacity" :min="1" :precision="0" />
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            v-hasPerm="'biz:appointment:config'"
+            type="primary"
+            :loading="configSaving"
+            @click="saveConfig"
+          >
+            保存配置
+          </el-button>
+        </el-form-item>
+        <span class="config-tip">适用于每天 10:00–18:00 的 9 个整点时间段</span>
+      </el-form>
+    </el-card>
+
     <el-card class="page-search" shadow="never">
       <el-form ref="queryFormRef" :model="params" :inline="true" label-suffix=":">
         <el-form-item label="关键字" prop="keywords">
@@ -107,7 +126,7 @@
 
 <script setup lang="ts">
 import { Refresh } from "@element-plus/icons-vue";
-import { dayjs, type FormInstance } from "element-plus";
+import { dayjs, ElMessage, type FormInstance } from "element-plus";
 
 import AppointmentAPI from "@/api/appointment";
 import type { AppointmentItem, AppointmentQueryParams } from "@/api/appointment";
@@ -117,6 +136,9 @@ defineOptions({ name: "BizAppointment" });
 
 const today = dayjs().format("YYYY-MM-DD");
 const queryFormRef = ref<FormInstance>();
+const slotCapacity = ref(1);
+const configLoading = ref(false);
+const configSaving = ref(false);
 const { loading, list, total, params, fetchData, handleQuery, handleResetQuery } = usePageTable<
   AppointmentItem,
   AppointmentQueryParams
@@ -143,6 +165,27 @@ const selectedItems = computed(() => itemsByDate.value[selectedDate.value] ?? []
 
 function countOf(date: string) {
   return itemsByDate.value[date]?.length ?? 0;
+}
+
+async function loadConfig() {
+  configLoading.value = true;
+  try {
+    slotCapacity.value = (await AppointmentAPI.getConfig()).slotCapacity;
+  } finally {
+    configLoading.value = false;
+  }
+}
+
+async function saveConfig() {
+  configSaving.value = true;
+  try {
+    slotCapacity.value = (
+      await AppointmentAPI.updateConfig({ slotCapacity: slotCapacity.value })
+    ).slotCapacity;
+    ElMessage.success("保存成功");
+  } finally {
+    configSaving.value = false;
+  }
 }
 
 function openCalendar() {
@@ -172,13 +215,21 @@ watch(
   }
 );
 
-onMounted(handleQuery);
+onMounted(() => {
+  handleQuery();
+  loadConfig();
+});
 </script>
 
 <style scoped>
 .calendar-panel {
   display: grid;
   gap: 16px;
+}
+
+.config-tip {
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
 }
 
 .calendar-panel :deep(.el-calendar-day) {

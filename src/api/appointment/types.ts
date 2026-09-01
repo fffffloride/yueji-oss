@@ -14,3 +14,7 @@ export interface AppointmentItem {
   appointmentTime: string;
   createTime?: string | null;
 }
+
+export interface AppointmentConfig {
+  slotCapacity: number;
+}
