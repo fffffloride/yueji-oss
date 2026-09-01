@@ -126,7 +126,7 @@
 
 <script setup lang="ts">
 import { Refresh } from "@element-plus/icons-vue";
-import { dayjs, ElMessage, type FormInstance } from "element-plus";
+import { dayjs, ElMessage, ElMessageBox, type FormInstance } from "element-plus";
 
 import AppointmentAPI from "@/api/appointment";
 import type { AppointmentItem, AppointmentQueryParams } from "@/api/appointment";
@@ -137,6 +137,7 @@ defineOptions({ name: "BizAppointment" });
 const today = dayjs().format("YYYY-MM-DD");
 const queryFormRef = ref<FormInstance>();
 const slotCapacity = ref(1);
+const savedSlotCapacity = ref(1);
 const configLoading = ref(false);
 const configSaving = ref(false);
 const { loading, list, total, params, fetchData, handleQuery, handleResetQuery } = usePageTable<
@@ -170,18 +171,29 @@ function countOf(date: string) {
 async function loadConfig() {
   configLoading.value = true;
   try {
-    slotCapacity.value = (await AppointmentAPI.getConfig()).slotCapacity;
+    const config = await AppointmentAPI.getConfig();
+    slotCapacity.value = config.slotCapacity;
+    savedSlotCapacity.value = config.slotCapacity;
   } finally {
     configLoading.value = false;
   }
 }
 
 async function saveConfig() {
+  if (slotCapacity.value === savedSlotCapacity.value) {
+    ElMessage.info("配置未变化");
+    return;
+  }
+  await ElMessageBox.confirm(
+    `确认将每时段预约上限从 ${savedSlotCapacity.value} 人修改为 ${slotCapacity.value} 人？`,
+    "确认修改预约上限",
+    { type: "warning", confirmButtonText: "确认修改", cancelButtonText: "取消" }
+  );
   configSaving.value = true;
   try {
-    slotCapacity.value = (
-      await AppointmentAPI.updateConfig({ slotCapacity: slotCapacity.value })
-    ).slotCapacity;
+    const config = await AppointmentAPI.updateConfig({ slotCapacity: slotCapacity.value });
+    slotCapacity.value = config.slotCapacity;
+    savedSlotCapacity.value = config.slotCapacity;
     ElMessage.success("保存成功");
   } finally {
     configSaving.value = false;
