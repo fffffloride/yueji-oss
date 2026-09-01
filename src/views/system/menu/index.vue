@@ -24,6 +24,7 @@
           <el-button v-hasPerm="['sys:menu:create']" type="primary" @click="openDialog('0')">
             新增
           </el-button>
+          <SortSaveStatus :status="sortStatus" />
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -39,7 +40,7 @@
         </div>
       </div>
 
-      <div class="page-table-wrapper">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
         <el-table
           ref="dataTableRef"
           v-loading="loading"
@@ -47,6 +48,7 @@
           border
           row-key="id"
           :data="list"
+          :row-class-name="rowClassName"
           height="100%"
           :tree-props="{
             children: 'children',
@@ -104,7 +106,18 @@
               <el-tag v-else type="info">隐藏</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="排序" align="center" width="80" prop="sort" />
+          <el-table-column label="位置" align="center" width="150">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'sys:menu:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column fixed="right" align="center" label="操作" width="220">
             <template #default="scope">
               <el-button
@@ -381,15 +394,6 @@
         <el-form-item v-if="formData.type !== MenuTypeEnum.BUTTON" label="图标" prop="icon">
           <icon-select v-model="formData.icon" />
         </el-form-item>
-
-        <el-form-item label="排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            style="width: 120px"
-            controls-position="right"
-            :min="0"
-          />
-        </el-form-item>
       </el-form>
 
       <template #footer>
@@ -416,10 +420,12 @@ import {
 import MenuAPI from "@/api/system/menu";
 import type { MenuForm, MenuItem, MenuQueryParams } from "@/api/system/menu";
 import type { OptionItem } from "@/api/common";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
+import { usePositionSort } from "@/composables";
 import { useAppStore } from "@/stores/app";
 import { CommonStatus, MenuScopeEnum, MenuTypeEnum } from "@/enums";
 import { DeviceEnum } from "@/enums/settings";
-import { isTenantEnabled } from "@/utils/tenant";
 import { isValidURL } from "@/utils";
 
 defineOptions({
@@ -438,6 +444,21 @@ const menuFormRef = ref<FormInstance>();
 const loading = ref(false);
 const list = ref<MenuItem[]>([]);
 const queryParams = reactive<MenuQueryParams>({ keywords: "" });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  filtered: computed(() => Boolean(queryParams.keywords)),
+  request: (row: MenuItem, position) =>
+    MenuAPI.movePosition(row.id!, position, String(row.parentId ?? "0")),
+  refresh: fetchData,
+});
 
 const dialogState = reactive({
   title: "新增菜单",
@@ -451,7 +472,6 @@ const initialFormData: MenuForm = {
   parentId: "0",
   visible: CommonStatus.ENABLED,
   scope: MenuScopeEnum.TENANT,
-  sort: 1,
   type: MenuTypeEnum.MENU,
   alwaysShow: 0,
   keepAlive: 1,
@@ -466,11 +486,11 @@ const menuTypes = [
 ];
 
 const formData = reactive<MenuForm>({ ...initialFormData });
+const originalParentId = ref("0");
 const currentMenuType = ref<MenuTypeEnum>(MenuTypeEnum.MENU);
 const menuTypeDrafts = reactive<Record<MenuTypeEnum, Partial<MenuForm>>>(createMenuTypeDrafts());
 
-// 多租户关闭时隐藏菜单范围字段。
-const showMenuScope = computed(() => isTenantEnabled());
+const showMenuScope = false;
 
 // 抽屉宽度（响应式）。
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
@@ -845,6 +865,7 @@ async function openDialog(parentId?: string, menuId?: string): Promise<void> {
     dialogState.title = "编辑菜单";
     const form = await MenuAPI.getFormData(menuId);
     assignFormData(form);
+    originalParentId.value = String(form.parentId ?? "0");
   } else {
     dialogState.title = "新增菜单";
     const nextParentId = parentId?.toString() ?? "0";
@@ -853,6 +874,7 @@ async function openDialog(parentId?: string, menuId?: string): Promise<void> {
       parentId: nextParentId,
       type: getDefaultMenuType(nextParentId),
     });
+    originalParentId.value = nextParentId;
   }
 }
 
@@ -916,6 +938,8 @@ async function handleSubmit(): Promise<void> {
   }
 
   const payload = normalizeMenuPayload();
+  if (menuId && String(formData.parentId) === originalParentId.value) delete payload.sort;
+  else payload.sort = 9999;
   loading.value = true;
   try {
     if (menuId) {

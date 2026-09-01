@@ -40,6 +40,7 @@
           <el-button v-hasPerm="'biz:product:create'" type="primary" @click="openDrawer()">
             新增商品
           </el-button>
+          <SortSaveStatus :status="sortStatus" />
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -105,7 +106,17 @@
               />
             </template>
           </el-table-column>
-          <el-table-column prop="sort" label="排序" width="70" align="center" />
+          <el-table-column label="位置" width="140" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'biz:product:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                drag-disabled
+                @move="(position) => enqueueMove(row, position, false)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="操作" fixed="right" width="130">
             <template #default="scope">
               <el-button
@@ -201,14 +212,6 @@
             style="width: 160px"
           />
           <span style="margin-left: 8px; color: var(--el-text-color-secondary)">元</span>
-        </el-form-item>
-        <el-form-item label="显示排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            :min="0"
-            controls-position="right"
-            style="width: 120px"
-          />
         </el-form-item>
         <el-form-item label="上架状态">
           <el-radio-group v-model="formData.status">
@@ -321,9 +324,12 @@ import { Refresh } from "@element-plus/icons-vue";
 import SingleImageUpload from "@/components/Upload/SingleImageUpload.vue";
 import MultiImageUpload from "@/components/Upload/MultiImageUpload.vue";
 import WangEditor from "@/components/WangEditor/index.vue";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
 import { ProductAPI, ProductCategoryAPI } from "@/api/product";
 import type { CategoryNode, ProductForm, ProductItem, ProductQueryParams } from "@/api/product";
 import type { OptionItem } from "@/api/common";
+import { usePositionSort } from "@/composables";
 
 defineOptions({
   name: "ProductGoods",
@@ -375,6 +381,17 @@ const list = ref<ProductItem[]>([]);
 const total = ref(0);
 const categoryOptions = ref<OptionItem[]>([]);
 
+const {
+  status: sortStatus,
+  scopeTotal,
+  enqueueMove,
+} = usePositionSort({
+  rows: list,
+  total,
+  request: (row: ProductItem, position) => ProductAPI.movePosition(row.id, position),
+  refresh: fetchData,
+});
+
 const queryParams = reactive<ProductQueryParams>({
   pageNum: 1,
   pageSize: 10,
@@ -394,7 +411,6 @@ type FormState = Omit<ProductForm, "skus" | "album" | "originalPrice"> & {
 const initialFormData: FormState = {
   painFriendly: false,
   status: 0,
-  sort: 0,
   skus: [],
   album: [],
   mainImage: "",
@@ -551,7 +567,6 @@ async function openDrawer(productId?: string): Promise<void> {
       detail: data.detail ?? "",
       usageNote: data.usageNote ?? undefined,
       status: data.status,
-      sort: data.sort,
       skus: data.skus?.length
         ? data.skus.map((s) => ({
             id: s.id,
@@ -600,7 +615,6 @@ async function handleSubmit(): Promise<void> {
     detail: formData.detail,
     usageNote: formData.usageNote || undefined,
     status: formData.status,
-    sort: formData.sort,
     skus: formData.skus.map((s) => ({
       id: s.id,
       name: s.name,

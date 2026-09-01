@@ -20,7 +20,11 @@
           <el-table-column label="会员折扣" width="120">
             <template #default="{ row }">{{ formatDiscount(row.discountRate) }}</template>
           </el-table-column>
-          <el-table-column prop="sort" label="排序" width="90" align="center" />
+          <el-table-column label="位置（按门槛）" width="150" align="center">
+            <template #default="{ $index }">
+              第 {{ (params.pageNum - 1) * params.pageSize + $index + 1 }} 位
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -70,7 +74,6 @@
           <el-input-number v-model="form.discountRate" :min="1" :max="100" :precision="2" />
           <span class="unit">%（100% 为无折扣）</span>
         </el-form-item>
-        <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">启用</el-radio>
@@ -108,7 +111,6 @@ const form = reactive({
   thresholdYuan: 0,
   discountRate: 100,
   status: 1,
-  sort: 0,
 });
 const rules: FormRules = {
   name: [{ required: true, message: "请输入等级名称", trigger: "blur" }],
@@ -121,7 +123,6 @@ function openDialog(row?: MemberLevel) {
     thresholdYuan: (row?.thresholdAmount ?? 0) / 100,
     discountRate: (row?.discountRate ?? 10000) / 100,
     status: row?.status ?? 1,
-    sort: row?.sort ?? 0,
   });
   visible.value = true;
 }
@@ -135,7 +136,6 @@ async function save() {
       thresholdAmount: Math.round(form.thresholdYuan * 100),
       discountRate: Math.round(form.discountRate * 100),
       status: form.status,
-      sort: form.sort,
     };
     if (form.id) await MemberLevelAPI.update(form.id, data);
     else await MemberLevelAPI.create(data);

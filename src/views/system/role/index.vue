@@ -25,6 +25,7 @@
           <el-button type="danger" :disabled="!hasSelection" @click="handleBatchDelete()">
             删除
           </el-button>
+          <SortSaveStatus :status="sortStatus" />
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -40,12 +41,13 @@
         </div>
       </div>
 
-      <div class="page-table-wrapper">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
         <el-table
           ref="dataTableRef"
           v-loading="loading"
           class="page-table"
           :data="list"
+          :row-class-name="rowClassName"
           height="100%"
           highlight-current-row
           border
@@ -64,7 +66,18 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="排序" align="center" width="80" prop="sort" />
+          <el-table-column label="位置" align="center" width="150">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'sys:role:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
 
           <el-table-column fixed="right" label="操作" width="180" align="center">
             <template #default="scope">
@@ -147,15 +160,6 @@
             <el-radio :value="CommonStatus.ENABLED">正常</el-radio>
             <el-radio :value="CommonStatus.DISABLED">停用</el-radio>
           </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            controls-position="right"
-            :min="0"
-            style="width: 100px"
-          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -247,8 +251,10 @@ import type { RoleForm, RoleItem, RoleQueryParams } from "@/api/system/role";
 import MenuAPI from "@/api/system/menu";
 import DeptAPI from "@/api/system/dept";
 import type { OptionItem } from "@/api/common";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
 import { useAppStore } from "@/stores";
-import { usePageTable, useTableSelection } from "@/composables";
+import { usePageTable, usePositionSort, useTableSelection } from "@/composables";
 import { CommonStatus, DeviceEnum } from "@/enums";
 
 defineOptions({
@@ -289,6 +295,21 @@ const { loading, list, total, params, fetchData, handleQuery, handleResetQuery }
   request: RoleAPI.getPage,
   onBeforeReset: () => queryFormRef.value?.resetFields(),
 });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  total,
+  filtered: computed(() => Boolean(params.keywords)),
+  request: (row: RoleItem, position) => RoleAPI.movePosition(row.id!, position),
+  refresh: fetchData,
+});
 
 const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<RoleItem>();
 
@@ -298,7 +319,6 @@ const dialogState = reactive({
 });
 
 const initialFormData: RoleForm = {
-  sort: 1,
   status: CommonStatus.ENABLED,
 };
 
@@ -403,6 +423,8 @@ async function handleSubmit(): Promise<void> {
   if (!valid) return;
 
   const submitData: RoleForm = { ...formData };
+  if (formData.id) delete submitData.sort;
+  else submitData.sort = 9999;
   if (submitData.dataScope !== DATA_SCOPE_CUSTOM) {
     submitData.deptIds = undefined;
   }

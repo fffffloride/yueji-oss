@@ -85,6 +85,7 @@
         <el-form-item label="等级名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="级别顺序" prop="rank">
           <el-input-number v-model="form.rank" :min="1" />
+          <span class="unit">数值越小越靠前</span>
         </el-form-item>
         <el-form-item label="升级门槛">
           <el-input-number v-model="form.upgradeSalesYuan" :min="0" :precision="2" />
@@ -110,7 +111,6 @@
           />
           <span class="unit">%</span>
         </el-form-item>
-        <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">启用</el-radio>
@@ -156,7 +156,6 @@ const empty = () => ({
   level1RatePercent: 0,
   level2RatePercent: 0,
   status: 1,
-  sort: 0,
 });
 const form = reactive(empty());
 const rules: FormRules = {
@@ -191,7 +190,6 @@ async function save() {
       level1RateBps: Math.round(form.level1RatePercent * 100),
       level2RateBps: Math.round(form.level2RatePercent * 100),
       status: form.status,
-      sort: form.sort,
     };
     if (editingId.value) await DistributionAPI.updateLevel(editingId.value, data);
     else await DistributionAPI.createLevel(data);

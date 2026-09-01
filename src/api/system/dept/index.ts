@@ -29,6 +29,13 @@ const DeptAPI = {
   update(id: string, data: DeptForm) {
     return request({ url: `${DEPT_BASE_URL}/${id}`, method: "put", data });
   },
+  movePosition(id: string, position: number, parentId: string) {
+    return request({
+      url: `${DEPT_BASE_URL}/${id}/position`,
+      method: "patch",
+      data: { position, parentId },
+    });
+  },
   /** 批量删除部门，多个以英文逗号(,)分割 */
   deleteByIds(ids: string) {
     return request({ url: `${DEPT_BASE_URL}/${ids}`, method: "delete" });

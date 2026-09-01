@@ -20,14 +20,32 @@
         <el-button v-hasPerm="'biz:distribution:type:create'" type="primary" @click="openDrawer()">
           新增类型
         </el-button>
+        <SortSaveStatus :status="sortStatus" />
         <el-button class="page-icon-btn" @click="fetchData">
           <el-icon><Refresh /></el-icon>
         </el-button>
       </div>
-      <div class="page-table-wrapper">
-        <el-table v-loading="loading" :data="list" border height="100%">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
+        <el-table
+          v-loading="loading"
+          :data="list"
+          :row-class-name="rowClassName"
+          border
+          height="100%"
+        >
           <el-table-column prop="name" label="类型名称" min-width="180" />
-          <el-table-column prop="sort" label="排序" width="100" align="center" />
+          <el-table-column label="位置" width="150" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'biz:distribution:type:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-switch
@@ -74,7 +92,6 @@
         <el-form-item label="类型名称" prop="name">
           <el-input v-model="form.name" maxlength="64" />
         </el-form-item>
-        <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">启用</el-radio>
@@ -99,7 +116,9 @@ import {
   type AgentTypeItem,
   type DistributionConfigQuery,
 } from "@/api/distribution";
-import { usePageTable } from "@/composables";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
+import { usePageTable, usePositionSort } from "@/composables";
 
 defineOptions({ name: "BizDistributionType" });
 const { loading, list, total, params, fetchData, handleQuery, handleResetQuery } = usePageTable<
@@ -109,14 +128,29 @@ const { loading, list, total, params, fetchData, handleQuery, handleResetQuery }
   initialParams: { pageNum: 1, pageSize: 10, keywords: "", status: undefined },
   request: DistributionAPI.getTypePage,
 });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  total,
+  filtered: computed(() => Boolean(params.keywords || params.status !== undefined)),
+  request: (row: AgentTypeItem, position) => DistributionAPI.moveTypePosition(row.id, position),
+  refresh: fetchData,
+});
 const visible = ref(false),
   saving = ref(false),
   editingId = ref("");
 const formRef = ref<FormInstance>();
-const form = reactive<AgentTypeForm>({ name: "", status: 1, sort: 0 });
+const form = reactive<AgentTypeForm>({ name: "", status: 1 });
 const rules: FormRules = { name: [{ required: true, message: "请输入类型名称" }] };
 async function openDrawer(id?: string) {
-  Object.assign(form, { name: "", status: 1, sort: 0 });
+  Object.assign(form, { name: "", status: 1, sort: undefined });
   editingId.value = id || "";
   if (id) Object.assign(form, await DistributionAPI.getTypeForm(id));
   visible.value = true;
@@ -125,8 +159,9 @@ async function save() {
   if (!(await formRef.value?.validate().catch(() => false))) return;
   saving.value = true;
   try {
-    if (editingId.value) await DistributionAPI.updateType(editingId.value, form);
-    else await DistributionAPI.createType(form);
+    const data = { name: form.name, status: form.status };
+    if (editingId.value) await DistributionAPI.updateType(editingId.value, data);
+    else await DistributionAPI.createType(data);
     ElMessage.success("保存成功");
     visible.value = false;
     fetchData();

@@ -6,6 +6,7 @@
           <el-button v-hasPerm="'biz:product-category:create'" type="primary" @click="openDialog()">
             新增分类
           </el-button>
+          <SortSaveStatus :status="sortStatus" />
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -16,12 +17,13 @@
         </div>
       </div>
 
-      <div class="page-table-wrapper">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
         <el-table
           v-loading="loading"
           :data="list"
           class="page-table"
           row-key="id"
+          :row-class-name="rowClassName"
           default-expand-all
           border
           height="100%"
@@ -45,7 +47,18 @@
               <el-tag v-else type="info">禁用</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="sort" label="排序" width="80" align="center" />
+          <el-table-column label="位置" width="150" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'biz:product-category:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="操作" fixed="right" width="200">
             <template #default="scope">
               <el-button
@@ -105,14 +118,6 @@
         <el-form-item label="分类图标" prop="icon">
           <SingleImageUpload v-model="formData.icon" />
         </el-form-item>
-        <el-form-item label="显示排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            controls-position="right"
-            style="width: 100px"
-            :min="0"
-          />
-        </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="formData.status">
             <el-radio :value="1">启用</el-radio>
@@ -136,9 +141,12 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "elem
 import { Refresh } from "@element-plus/icons-vue";
 
 import SingleImageUpload from "@/components/Upload/SingleImageUpload.vue";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
 import { ProductCategoryAPI } from "@/api/product";
 import type { CategoryForm, CategoryNode } from "@/api/product";
 import type { OptionItem } from "@/api/common";
+import { usePositionSort } from "@/composables";
 
 defineOptions({
   name: "ProductCategory",
@@ -151,6 +159,21 @@ const formRef = ref<FormInstance>();
 const loading = ref(false);
 const list = ref<CategoryNode[]>([]);
 
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  request: (row: CategoryNode, position) =>
+    ProductCategoryAPI.movePosition(row.id, position, String(row.parentId ?? "0")),
+  refresh: fetchData,
+});
+
 const dialogState = reactive({
   title: "",
   visible: false,
@@ -160,7 +183,6 @@ const categoryOptions = ref<OptionItem[]>([]);
 
 const initialFormData: CategoryForm = {
   parentId: "0",
-  sort: 0,
   status: 1,
 };
 
@@ -204,7 +226,6 @@ async function openDialog(parentId?: string, row?: CategoryNode): Promise<void> 
       name: row.name,
       parentId: String(row.parentId),
       icon: row.icon ?? undefined,
-      sort: row.sort,
       status: row.status,
     });
   } else {

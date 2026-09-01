@@ -8,11 +8,12 @@ export interface DistributionConfigQuery extends BaseQueryParams {
 export interface AgentTypeForm {
   name: string;
   status: number;
-  sort: number;
+  sort?: number;
 }
 
 export interface AgentTypeItem extends AgentTypeForm {
   id: string;
+  sort: number;
   createTime?: string;
 }
 

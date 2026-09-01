@@ -25,6 +25,13 @@ export const ProductCategoryAPI = {
   update(id: string, data: CategoryForm) {
     return request({ url: `${CATEGORY_BASE_URL}/${id}`, method: "put", data });
   },
+  movePosition(id: string, position: number, parentId: string) {
+    return request({
+      url: `${CATEGORY_BASE_URL}/${id}/position`,
+      method: "patch",
+      data: { position, parentId },
+    });
+  },
   /** 删除分类 */
   deleteById(id: string) {
     return request({ url: `${CATEGORY_BASE_URL}/${id}`, method: "delete" });
@@ -57,6 +64,13 @@ export const ProductAPI = {
   /** 修改商品 */
   update(id: string, data: ProductForm) {
     return request({ url: `${PRODUCT_BASE_URL}/${id}`, method: "put", data });
+  },
+  movePosition(id: string, position: number) {
+    return request({
+      url: `${PRODUCT_BASE_URL}/${id}/position`,
+      method: "patch",
+      data: { position },
+    });
   },
   /** 上下架 */
   updateStatus(id: string, status: number) {

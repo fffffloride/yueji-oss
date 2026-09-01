@@ -20,15 +20,33 @@
         <el-button v-hasPerm="'biz:decoration:notice:create'" type="primary" @click="openDrawer()">
           新增公告
         </el-button>
+        <SortSaveStatus :status="sortStatus" />
         <el-button class="page-icon-btn" @click="fetchData">
           <el-icon><Refresh /></el-icon>
         </el-button>
       </div>
-      <div class="page-table-wrapper">
-        <el-table v-loading="loading" :data="list" border height="100%">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
+        <el-table
+          v-loading="loading"
+          :data="list"
+          :row-class-name="rowClassName"
+          border
+          height="100%"
+        >
           <el-table-column prop="title" label="标题" min-width="200" />
           <el-table-column prop="content" label="内容" min-width="280" show-overflow-tooltip />
-          <el-table-column prop="sort" label="排序" width="80" align="center" />
+          <el-table-column label="位置" width="150" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'biz:decoration:notice:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-switch
@@ -85,7 +103,6 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">启用</el-radio>
@@ -110,7 +127,9 @@ import {
   type NoticeForm,
   type NoticeItem,
 } from "@/api/decoration";
-import { usePageTable } from "@/composables";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
+import { usePageTable, usePositionSort } from "@/composables";
 
 defineOptions({ name: "BizDecorationNotice" });
 const { loading, list, total, params, fetchData, handleQuery, handleResetQuery } = usePageTable<
@@ -120,18 +139,33 @@ const { loading, list, total, params, fetchData, handleQuery, handleResetQuery }
   initialParams: { pageNum: 1, pageSize: 10, keywords: "", status: undefined },
   request: NoticeAPI.getPage,
 });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  total,
+  filtered: computed(() => Boolean(params.keywords || params.status !== undefined)),
+  request: (row: NoticeItem, position) => NoticeAPI.movePosition(row.id, position),
+  refresh: fetchData,
+});
 const drawerVisible = ref(false);
 const saving = ref(false);
 const editingId = ref("");
 const formRef = ref<FormInstance>();
-const form = reactive<NoticeForm>({ title: "", content: "", sort: 0, status: 1 });
+const form = reactive<NoticeForm>({ title: "", content: "", status: 1 });
 const rules: FormRules = {
   title: [{ required: true, message: "请输入标题" }],
   content: [{ required: true, message: "请输入内容" }],
 };
 
 async function openDrawer(id?: string) {
-  Object.assign(form, { title: "", content: "", sort: 0, status: 1 });
+  Object.assign(form, { title: "", content: "", sort: undefined, status: 1 });
   editingId.value = id || "";
   if (id) Object.assign(form, await NoticeAPI.getForm(id));
   drawerVisible.value = true;
@@ -140,8 +174,9 @@ async function save() {
   if (!(await formRef.value?.validate().catch(() => false))) return;
   saving.value = true;
   try {
-    if (editingId.value) await NoticeAPI.update(editingId.value, form);
-    else await NoticeAPI.create(form);
+    const data = { title: form.title, content: form.content, status: form.status };
+    if (editingId.value) await NoticeAPI.update(editingId.value, data);
+    else await NoticeAPI.create(data);
     ElMessage.success("保存成功");
     drawerVisible.value = false;
     fetchData();

@@ -25,6 +25,7 @@
           <el-button type="danger" :disabled="!hasSelection" @click="handleBatchDelete()">
             删除
           </el-button>
+          <SortSaveStatus :status="sortStatus" />
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -40,11 +41,12 @@
         </div>
       </div>
 
-      <div class="page-table-wrapper">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
         <el-table
           v-loading="loading"
           highlight-current-row
           :data="list"
+          :row-class-name="rowClassName"
           class="page-table"
           border
           height="100%"
@@ -53,7 +55,18 @@
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column label="字典项标签" prop="label" />
           <el-table-column label="字典项值" prop="value" />
-          <el-table-column label="排序" prop="sort" />
+          <el-table-column label="位置" width="150" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'sys:dict-item:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="状态">
             <template #default="scope">
               <el-tag :type="scope.row.status === CommonStatus.ENABLED ? 'success' : 'info'">
@@ -108,9 +121,6 @@
             <el-radio :value="CommonStatus.DISABLED">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="formData.sort" controls-position="right" />
-        </el-form-item>
         <el-form-item>
           <template #label>
             <div class="flex-y-center">
@@ -160,7 +170,9 @@ import { FullScreen, QuestionFilled, Refresh } from "@element-plus/icons-vue";
 
 import DictAPI from "@/api/system/dict";
 import type { DictItem, DictItemForm, DictItemQueryParams } from "@/api/system/dict";
-import { usePageTable, useTableSelection } from "@/composables";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
+import { usePageTable, usePositionSort, useTableSelection } from "@/composables";
 import { CommonStatus } from "@/enums";
 
 defineOptions({
@@ -202,6 +214,22 @@ const { loading, list, total, params, fetchData, handleQuery, handleResetQuery }
   request: (query) => DictAPI.getDictItemPage(dictCode.value, query),
   onBeforeReset: () => queryFormRef.value?.resetFields(),
 });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  total,
+  filtered: computed(() => Boolean(params.keywords)),
+  request: (row: DictItem, position) =>
+    DictAPI.moveDictItemPosition(dictCode.value, row.id, position),
+  refresh: fetchData,
+});
 
 const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<DictItem>();
 
@@ -212,7 +240,6 @@ const dialogState = reactive({
 
 const initialFormData: DictItemForm = {
   dictCode: dictCode.value,
-  sort: 1,
   status: CommonStatus.ENABLED,
   tagType: "",
 };
@@ -284,14 +311,17 @@ async function handleSubmit(): Promise<void> {
 
   formData.dictCode = dictCode.value;
   const id = formData.id;
+  const submitData = { ...formData };
+  if (id) delete submitData.sort;
+  else submitData.sort = 9999;
 
   loading.value = true;
   try {
     if (id) {
-      await DictAPI.updateDictItem(dictCode.value, id, formData);
+      await DictAPI.updateDictItem(dictCode.value, id, submitData);
       ElMessage.success("修改成功");
     } else {
-      await DictAPI.createDictItem(dictCode.value, formData);
+      await DictAPI.createDictItem(dictCode.value, submitData);
       ElMessage.success("新增成功");
     }
     closeDialog();

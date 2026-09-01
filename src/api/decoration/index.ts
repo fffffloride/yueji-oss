@@ -23,6 +23,8 @@ export const BannerAPI = {
   create: (data: BannerForm) => request({ url: `${BASE_URL}/banners`, method: "post", data }),
   update: (id: string, data: BannerForm) =>
     request({ url: `${BASE_URL}/banners/${id}`, method: "put", data }),
+  movePosition: (id: string, position: number) =>
+    request({ url: `${BASE_URL}/banners/${id}/position`, method: "patch", data: { position } }),
   updateStatus: (id: string, status: number) =>
     request({ url: `${BASE_URL}/banners/${id}/status`, method: "patch", data: { status } }),
   delete: (id: string) => request({ url: `${BASE_URL}/banners/${id}`, method: "delete" }),
@@ -40,6 +42,8 @@ export const NoticeAPI = {
   create: (data: NoticeForm) => request({ url: `${BASE_URL}/notices`, method: "post", data }),
   update: (id: string, data: NoticeForm) =>
     request({ url: `${BASE_URL}/notices/${id}`, method: "put", data }),
+  movePosition: (id: string, position: number) =>
+    request({ url: `${BASE_URL}/notices/${id}/position`, method: "patch", data: { position } }),
   updateStatus: (id: string, status: number) =>
     request({ url: `${BASE_URL}/notices/${id}/status`, method: "patch", data: { status } }),
   delete: (id: string) => request({ url: `${BASE_URL}/notices/${id}`, method: "delete" }),

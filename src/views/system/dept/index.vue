@@ -39,6 +39,7 @@
           >
             删除
           </el-button>
+          <SortSaveStatus :status="sortStatus" />
         </div>
         <div class="page-toolbar__right">
           <el-tooltip content="刷新" placement="top">
@@ -54,12 +55,13 @@
         </div>
       </div>
 
-      <div class="page-table-wrapper">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
         <el-table
           v-loading="loading"
           :data="list"
           class="page-table"
           row-key="id"
+          :row-class-name="rowClassName"
           default-expand-all
           border
           height="100%"
@@ -76,7 +78,18 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop="sort" label="排序" width="100" />
+          <el-table-column label="位置" width="150" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'sys:dept:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
 
           <el-table-column label="操作" fixed="right" align="left" width="200">
             <template #default="scope">
@@ -136,14 +149,6 @@
         <el-form-item label="部门编号" prop="code">
           <el-input v-model="formData.code" placeholder="请输入部门编码" />
         </el-form-item>
-        <el-form-item label="显示排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            controls-position="right"
-            style="width: 100px"
-            :min="0"
-          />
-        </el-form-item>
         <el-form-item label="部门状态">
           <el-radio-group v-model="formData.status">
             <el-radio :value="CommonStatus.ENABLED">正常</el-radio>
@@ -169,7 +174,9 @@ import { Refresh, FullScreen } from "@element-plus/icons-vue";
 import DeptAPI from "@/api/system/dept";
 import type { DeptForm, DeptItem, DeptQueryParams } from "@/api/system/dept";
 import type { OptionItem } from "@/api/common";
-import { useTableSelection } from "@/composables";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
+import { usePositionSort, useTableSelection } from "@/composables";
 import { CommonStatus } from "@/enums";
 
 defineOptions({
@@ -189,6 +196,21 @@ const queryParams = reactive<DeptQueryParams>({
   keywords: "",
   status: undefined,
 });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  filtered: computed(() => Boolean(queryParams.keywords || queryParams.status !== undefined)),
+  request: (row: DeptItem, position) =>
+    DeptAPI.movePosition(row.id!, position, String(row.parentId ?? "0")),
+  refresh: fetchData,
+});
 
 const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<DeptItem>();
 
@@ -202,16 +224,15 @@ const deptOptions = ref<OptionItem[]>([]);
 const initialFormData: DeptForm = {
   status: CommonStatus.ENABLED,
   parentId: "0",
-  sort: 1,
 };
 
 const formData = reactive<DeptForm>({ ...initialFormData });
+const originalParentId = ref("0");
 
 const rules: FormRules<DeptForm> = {
   parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
   name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
   code: [{ required: true, message: "部门编号不能为空", trigger: "blur" }],
-  sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
 };
 
 /**
@@ -274,9 +295,11 @@ async function openDialog(parentId?: string, deptId?: string): Promise<void> {
     dialogState.title = "修改部门";
     const form = await DeptAPI.getFormData(deptId);
     Object.assign(formData, form);
+    originalParentId.value = String(form.parentId ?? "0");
   } else {
     dialogState.title = "新增部门";
     formData.parentId = parentId || "0";
+    originalParentId.value = String(formData.parentId);
   }
 }
 
@@ -293,11 +316,14 @@ async function handleSubmit(): Promise<void> {
   loading.value = true;
   try {
     const deptId = formData.id;
+    const submitData = { ...formData };
+    if (deptId && String(formData.parentId) === originalParentId.value) delete submitData.sort;
+    else submitData.sort = 9999;
     if (deptId) {
-      await DeptAPI.update(deptId, formData);
+      await DeptAPI.update(deptId, submitData);
       ElMessage.success("修改成功");
     } else {
-      await DeptAPI.create(formData);
+      await DeptAPI.create(submitData);
       ElMessage.success("新增成功");
     }
     closeDialog();

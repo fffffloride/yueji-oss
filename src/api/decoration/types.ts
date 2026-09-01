@@ -17,7 +17,7 @@ export interface BannerItem {
 export interface BannerForm {
   imageUrl: string;
   linkUrl?: string;
-  sort: number;
+  sort?: number;
   status: number;
 }
 
@@ -30,7 +30,7 @@ export interface NoticeItem {
   createTime?: string;
 }
 
-export type NoticeForm = Omit<NoticeItem, "id" | "createTime">;
+export type NoticeForm = Omit<NoticeItem, "id" | "createTime" | "sort"> & { sort?: number };
 
 export interface BrandForm {
   id?: string;

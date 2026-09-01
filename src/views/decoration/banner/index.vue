@@ -18,19 +18,37 @@
         <el-button v-hasPerm="'biz:decoration:banner:create'" type="primary" @click="openDrawer()">
           新增 Banner
         </el-button>
+        <SortSaveStatus :status="sortStatus" />
         <el-button class="page-icon-btn" @click="fetchData">
           <el-icon><Refresh /></el-icon>
         </el-button>
       </div>
-      <div class="page-table-wrapper">
-        <el-table v-loading="loading" :data="list" border height="100%">
+      <div class="page-table-wrapper" @dragover.prevent @drop="handleDrop">
+        <el-table
+          v-loading="loading"
+          :data="list"
+          :row-class-name="rowClassName"
+          border
+          height="100%"
+        >
           <el-table-column label="图片" width="180">
             <template #default="{ row }">
               <el-image :src="row.imageUrl" fit="cover" style="width: 140px; height: 70px" />
             </template>
           </el-table-column>
           <el-table-column prop="linkUrl" label="跳转地址" min-width="220" show-overflow-tooltip />
-          <el-table-column prop="sort" label="排序" width="80" align="center" />
+          <el-table-column label="位置" width="150" align="center">
+            <template #default="{ row }">
+              <SortPositionCell
+                v-hasPerm="'biz:decoration:banner:update'"
+                :position="row.sort"
+                :total="scopeTotal(row)"
+                :drag-disabled="dragDisabled"
+                @move="(position) => enqueueMove(row, position)"
+                @dragstart="(event) => handleDragStart(row, event)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-switch
@@ -85,7 +103,6 @@
         <el-form-item label="跳转地址" prop="linkUrl">
           <el-input v-model="form.linkUrl" placeholder="可选，支持站内或完整 URL" />
         </el-form-item>
-        <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">启用</el-radio>
@@ -111,7 +128,9 @@ import {
   type DecorationQuery,
 } from "@/api/decoration";
 import SingleImageUpload from "@/components/Upload/SingleImageUpload.vue";
-import { usePageTable } from "@/composables";
+import SortPositionCell from "@/components/SortPositionCell/index.vue";
+import SortSaveStatus from "@/components/SortSaveStatus/index.vue";
+import { usePageTable, usePositionSort } from "@/composables";
 
 defineOptions({ name: "BizDecorationBanner" });
 
@@ -122,15 +141,30 @@ const { loading, list, total, params, fetchData, handleQuery, handleResetQuery }
   initialParams: { pageNum: 1, pageSize: 10, status: undefined },
   request: BannerAPI.getPage,
 });
+const {
+  status: sortStatus,
+  dragDisabled,
+  scopeTotal,
+  enqueueMove,
+  rowClassName,
+  handleDragStart,
+  handleDrop,
+} = usePositionSort({
+  rows: list,
+  total,
+  filtered: computed(() => params.status !== undefined),
+  request: (row: BannerItem, position) => BannerAPI.movePosition(row.id, position),
+  refresh: fetchData,
+});
 const drawerVisible = ref(false);
 const saving = ref(false);
 const editingId = ref("");
 const formRef = ref<FormInstance>();
-const form = reactive<BannerForm>({ imageUrl: "", linkUrl: "", sort: 0, status: 1 });
+const form = reactive<BannerForm>({ imageUrl: "", linkUrl: "", status: 1 });
 const rules: FormRules = { imageUrl: [{ required: true, message: "请上传图片" }] };
 
 async function openDrawer(id?: string) {
-  Object.assign(form, { imageUrl: "", linkUrl: "", sort: 0, status: 1 });
+  Object.assign(form, { imageUrl: "", linkUrl: "", sort: undefined, status: 1 });
   editingId.value = id || "";
   if (id) {
     const item = await BannerAPI.getForm(id);
@@ -142,8 +176,9 @@ async function save() {
   if (!(await formRef.value?.validate().catch(() => false))) return;
   saving.value = true;
   try {
-    if (editingId.value) await BannerAPI.update(editingId.value, form);
-    else await BannerAPI.create(form);
+    const data = { imageUrl: form.imageUrl, linkUrl: form.linkUrl, status: form.status };
+    if (editingId.value) await BannerAPI.update(editingId.value, data);
+    else await BannerAPI.create(data);
     ElMessage.success("保存成功");
     drawerVisible.value = false;
     fetchData();

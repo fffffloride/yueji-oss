@@ -47,6 +47,9 @@ const RoleAPI = {
   update(id: string, data: RoleForm) {
     return request({ url: `${ROLE_BASE_URL}/${id}`, method: "put", data });
   },
+  movePosition(id: string, position: number) {
+    return request({ url: `${ROLE_BASE_URL}/${id}/position`, method: "patch", data: { position } });
+  },
   /** 批量删除角色，多个以英文逗号(,)分割 */
   deleteByIds(ids: string) {
     return request({ url: `${ROLE_BASE_URL}/${ids}`, method: "delete" });

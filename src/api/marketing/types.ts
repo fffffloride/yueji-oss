@@ -9,7 +9,7 @@ export interface MemberLevel {
   sort: number;
 }
 
-export type MemberLevelForm = Omit<MemberLevel, "id"> & { id?: string };
+export type MemberLevelForm = Omit<MemberLevel, "id" | "sort"> & { id?: string };
 
 export interface PointsRule {
   earnPerYuan: number;

@@ -37,6 +37,13 @@ const MenuAPI = {
   update(id: string, data: MenuForm) {
     return request({ url: `${MENU_BASE_URL}/${id}`, method: "put", data });
   },
+  movePosition(id: string, position: number, parentId: string) {
+    return request({
+      url: `${MENU_BASE_URL}/${id}/position`,
+      method: "patch",
+      data: { position, parentId },
+    });
+  },
   /** 删除菜单 */
   deleteById(id: string) {
     return request({ url: `${MENU_BASE_URL}/${id}`, method: "delete" });

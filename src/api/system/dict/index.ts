@@ -148,6 +148,14 @@ const DictAPI = {
       },
     });
   },
+  /** 调整字典项全局位置 */
+  moveDictItemPosition(dictCode: string, id: string, position: number) {
+    return request({
+      url: `${DICT_BASE_URL}/${dictCode}/items/${id}/position`,
+      method: "patch",
+      data: { position },
+    });
+  },
   /** 删除字典项 */
   deleteDictItems(dictCode: string, ids: string) {
     return request({ url: `${DICT_BASE_URL}/${dictCode}/items/${ids}`, method: "delete" });

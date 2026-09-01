@@ -47,6 +47,8 @@ export const DistributionAPI = {
     request({ url: `${BASE_URL}/agent-types`, method: "post", data }),
   updateType: (id: string, data: AgentTypeForm) =>
     request({ url: `${BASE_URL}/agent-types/${id}`, method: "put", data }),
+  moveTypePosition: (id: string, position: number) =>
+    request({ url: `${BASE_URL}/agent-types/${id}/position`, method: "patch", data: { position } }),
   updateTypeStatus: (id: string, status: number) =>
     request({ url: `${BASE_URL}/agent-types/${id}/status`, method: "patch", data: { status } }),
   deleteType: (id: string) => request({ url: `${BASE_URL}/agent-types/${id}`, method: "delete" }),
