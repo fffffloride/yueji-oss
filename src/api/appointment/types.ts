@@ -12,6 +12,10 @@ export interface AppointmentItem {
   memberMobile?: string | null;
   appointmentDate: string;
   appointmentTime: string;
+  sceneType: "CONSULTATION" | "ORDER";
+  orderId?: string | null;
+  orderNo?: string | null;
+  productNames: string[];
   createTime?: string | null;
 }
 

@@ -62,6 +62,13 @@
       <div class="page-table-wrapper">
         <el-table v-loading="loading" :data="list" border height="100%">
           <el-table-column prop="id" label="预约ID" min-width="100" />
+          <el-table-column label="预约场景" width="110">
+            <template #default="{ row }">
+              <el-tag :type="row.sceneType === 'ORDER' ? 'primary' : 'info'" effect="plain">
+                {{ sceneLabel(row) }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="会员" min-width="160">
             <template #default="{ row }">{{ row.memberNickname || row.memberId }}</template>
           </el-table-column>
@@ -70,6 +77,15 @@
           </el-table-column>
           <el-table-column prop="appointmentDate" label="预约日期" width="130" />
           <el-table-column prop="appointmentTime" label="预约时间" width="110" />
+          <el-table-column label="场景信息" min-width="260">
+            <template #default="{ row }">
+              <template v-if="row.sceneType === 'ORDER'">
+                <div>{{ row.orderNo || `订单 ${row.orderId}` }}</div>
+                <small class="scene-products">{{ productText(row) }}</small>
+              </template>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column label="提交时间" prop="createTime" width="180">
             <template #default="{ row }">{{ row.createTime || "-" }}</template>
           </el-table-column>
@@ -114,7 +130,12 @@
           <ul v-else class="day-list">
             <li v-for="item in selectedItems" :key="item.id">
               <strong>{{ item.appointmentTime }}</strong>
-              <span>{{ item.memberNickname || item.memberId }}</span>
+              <span>
+                {{ item.memberNickname || item.memberId }} · {{ sceneLabel(item) }}
+                <small v-if="item.sceneType === 'ORDER'" class="scene-products">
+                  {{ item.orderNo || `订单 ${item.orderId}` }} · {{ productText(item) }}
+                </small>
+              </span>
               <small>{{ item.memberMobile || "-" }}</small>
             </li>
           </ul>
@@ -166,6 +187,14 @@ const selectedItems = computed(() => itemsByDate.value[selectedDate.value] ?? []
 
 function countOf(date: string) {
   return itemsByDate.value[date]?.length ?? 0;
+}
+
+function sceneLabel(item: Partial<AppointmentItem>) {
+  return item.sceneType === "ORDER" ? "订单预约" : "面诊预约";
+}
+
+function productText(item: Partial<AppointmentItem>) {
+  return item.productNames?.length ? item.productNames.join("、") : "商品信息不可用";
 }
 
 async function loadConfig() {
@@ -318,6 +347,12 @@ onMounted(() => {
 }
 
 .day-list small {
+  color: var(--el-text-color-secondary);
+}
+
+.scene-products {
+  display: block;
+  margin-top: 2px;
   color: var(--el-text-color-secondary);
 }
 </style>
