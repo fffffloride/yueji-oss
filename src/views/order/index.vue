@@ -181,6 +181,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
+const route = useRoute();
 const tableWrapperRef = ref<HTMLElement | null>(null);
 const { toggle: toggleFullscreen } = useFullscreen(tableWrapperRef);
 const queryFormRef = ref<FormInstance>();
@@ -189,7 +190,12 @@ const { loading, list, total, params, fetchData, handleQuery, handleResetQuery }
   OrderListItem,
   OrderQueryParams
 >({
-  initialParams: { pageNum: 1, pageSize: 10, keywords: "", status: undefined },
+  initialParams: {
+    pageNum: 1,
+    pageSize: 10,
+    keywords: typeof route.query.keywords === "string" ? route.query.keywords : "",
+    status: undefined,
+  },
   request: OrderAPI.getPage,
   onBeforeReset: () => queryFormRef.value?.resetFields(),
 });
@@ -271,7 +277,14 @@ async function handleExport() {
   downloadFile(response, "订单列表.xlsx");
 }
 
-onMounted(() => {
-  handleQuery();
-});
+watch(
+  () => (route.name === "BizOrder" ? route.fullPath : ""),
+  (path) => {
+    if (!path) return;
+    params.keywords = typeof route.query.keywords === "string" ? route.query.keywords : "";
+    handleQuery();
+    if (typeof route.query.id === "string") openDetail(route.query.id);
+  },
+  { immediate: true }
+);
 </script>
