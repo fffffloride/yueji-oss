@@ -1,6 +1,12 @@
 import request from "@/utils/request";
 import type { PageResult } from "@/api/common";
-import type { OrderDetail, OrderListItem, OrderQueryParams, PaymentInfo } from "./types";
+import type {
+  OrderDetail,
+  OrderListItem,
+  OrderQueryParams,
+  PaymentInfo,
+  RefundInfo,
+} from "./types";
 
 const ORDER_BASE_URL = "/api/v1/orders";
 
@@ -43,7 +49,7 @@ const OrderAPI = {
   },
 
   refund(paymentNo: string, reason: string) {
-    return request({
+    return request<unknown, RefundInfo>({
       url: `/api/v1/payments/${paymentNo}/refund`,
       method: "post",
       data: { reason },

@@ -65,3 +65,8 @@ export interface PaymentInfo {
   thirdPartyNo?: string | null;
   paidTime?: string | null;
 }
+
+export interface RefundInfo {
+  refundNo: string;
+  status: 0 | 1 | 2 | 3 | 4;
+}

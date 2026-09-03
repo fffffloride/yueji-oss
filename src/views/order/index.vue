@@ -264,12 +264,34 @@ async function handleRefund(orderId: string, orderNo: string) {
     }
   );
   const payment = await OrderAPI.getPayment(orderId);
-  await OrderAPI.refund(payment.paymentNo, reason.trim());
-  ElMessage.success("退款成功");
+  const refund = await OrderAPI.refund(payment.paymentNo, reason.trim());
+  showRefundResult(refund.status);
   if (detail.value?.id === orderId) {
     detail.value = await OrderAPI.getDetail(orderId);
   }
   fetchData();
+}
+
+function showRefundResult(status: number) {
+  switch (status) {
+    case 0:
+      ElMessage.info("退款申请已提交，微信处理中，请稍后关注退款状态");
+      break;
+    case 1:
+      ElMessage.success("退款成功");
+      break;
+    case 2:
+      ElMessage.error("退款失败，请核实微信支付渠道状态后处理");
+      break;
+    case 3:
+      ElMessage.warning("退款已关闭，系统将更换退款单号重试，请持续关注");
+      break;
+    case 4:
+      ElMessage.error("退款异常，需登录微信支付商户平台人工处理");
+      break;
+    default:
+      ElMessage.warning("退款状态未知，请刷新后核实");
+  }
 }
 
 async function handleExport() {
