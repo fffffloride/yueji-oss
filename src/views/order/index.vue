@@ -257,7 +257,7 @@ async function handleRefund(orderId: string, orderNo: string) {
       inputValidator: (value) => {
         const text = value.trim();
         if (!text) return "请输入退款原因";
-        if (text.length > 255) return "退款原因不能超过255个字符";
+        if (new Blob([text]).size > 80) return "退款原因不能超过80字节（约26个中文）";
         return true;
       },
       type: "warning",
