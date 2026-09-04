@@ -4,6 +4,7 @@ import type {
   BannerForm,
   BannerItem,
   BrandForm,
+  HomeCardsForm,
   DecorationQuery,
   NoticeForm,
   NoticeItem,
@@ -53,6 +54,11 @@ export const BrandAPI = {
   get: () => request<unknown, BrandForm>({ url: `${BASE_URL}/brand`, method: "get" }),
   save: (content: string) =>
     request({ url: `${BASE_URL}/brand`, method: "put", data: { content } }),
+};
+
+export const HomeCardsAPI = {
+  get: () => request<unknown, HomeCardsForm>({ url: `${BASE_URL}/cards`, method: "get" }),
+  save: (data: HomeCardsForm) => request({ url: `${BASE_URL}/cards`, method: "put", data }),
 };
 
 export * from "./types";

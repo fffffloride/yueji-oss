@@ -36,3 +36,13 @@ export interface BrandForm {
   id?: string;
   content: string;
 }
+
+export interface HomeCard {
+  title: string;
+  imageUrl: string;
+  content: string;
+}
+
+export interface HomeCardsForm {
+  cards: HomeCard[];
+}
