@@ -46,3 +46,11 @@ export interface HomeCard {
 export interface HomeCardsForm {
   cards: HomeCard[];
 }
+
+export interface PromoCard extends Pick<HomeCard, "title" | "imageUrl"> {
+  linkUrl: string;
+}
+
+export interface PromoCardsForm {
+  cards: PromoCard[];
+}
